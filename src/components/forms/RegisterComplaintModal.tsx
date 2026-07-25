@@ -211,7 +211,7 @@ export const RegisterComplaintModal: React.FC<ModalProps> = ({ isOpen, onClose }
               </h3>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <div>
                 <label className="block text-[11px] font-medium text-slate-600 dark:text-slate-400 mb-1">Student ID *</label>
                 <input
@@ -237,15 +237,14 @@ export const RegisterComplaintModal: React.FC<ModalProps> = ({ isOpen, onClose }
 
               <div>
                 <label className="block text-[11px] font-medium text-slate-600 dark:text-slate-400 mb-1">Department *</label>
-                <select
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Computer Science & Engineering"
                   value={department}
                   onChange={(e) => setDepartment(e.target.value)}
                   className="w-full px-3 py-2 text-xs rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-brand-500/50 outline-none text-slate-800 dark:text-slate-100"
-                >
-                  {departments.map(d => (
-                    <option key={d.id} value={d.name}>{d.name} ({d.code})</option>
-                  ))}
-                </select>
+                />
               </div>
 
               <div>

@@ -18,6 +18,8 @@ import {
   INITIAL_NOTIFICATIONS 
 } from '../mock/mockData';
 
+import { apiService } from '../services/api';
+
 interface Toast {
   id: string;
   type: 'success' | 'error' | 'info' | 'warning';
@@ -43,6 +45,7 @@ interface AppContextType {
   setActiveTab: (tab: string) => void;
 
   // Actions
+  refreshIssuesFromDB: () => Promise<void>;
   addIssue: (issueData: Partial<GrievanceIssue>) => GrievanceIssue;
   updateIssueStatus: (issueId: string, status: IssueStatus, comment?: string) => void;
   assignStaffToIssue: (issueId: string, staff: AssignedStaff) => void;
@@ -57,7 +60,25 @@ interface AppContextType {
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [currentRole, setCurrentRole] = useState<UserRole>('student_council');
+  const [currentRole, setCurrentRoleState] = useState<UserRole>(() => {
+    const saved = localStorage.getItem('ac_role');
+    return (saved as UserRole) || 'student_council';
+  });
+
+  const setCurrentRole = (role: UserRole) => {
+    setCurrentRoleState(role);
+    localStorage.setItem('ac_role', role);
+  };
+
+  const [activeTab, setActiveTabState] = useState<string>(() => {
+    return localStorage.getItem('ac_active_tab') || 'dashboard';
+  });
+
+  const setActiveTab = (tab: string) => {
+    setActiveTabState(tab);
+    localStorage.setItem('ac_active_tab', tab);
+  };
+
   const [issues, setIssues] = useState<GrievanceIssue[]>(() => {
     const saved = localStorage.getItem('ac_issues');
     return saved ? JSON.parse(saved) : MOCK_ISSUES;
@@ -71,8 +92,57 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   });
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedIssueId, setSelectedIssueId] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<string>('dashboard');
   const [toasts, setToasts] = useState<Toast[]>([]);
+
+  // Function to fetch database records from MySQL via FastAPI REST API
+  const refreshIssuesFromDB = async () => {
+    const dbData = await apiService.getIssues();
+    if (dbData && Array.isArray(dbData) && dbData.length > 0) {
+      const mappedDBIssues: GrievanceIssue[] = dbData.map((dbItem: any) => ({
+        id: dbItem.id,
+        type: dbItem.type || 'academic',
+        title: dbItem.title,
+        student: {
+          id: dbItem.student_id || '2024STU101',
+          name: dbItem.student_name || 'Student',
+          department: dbItem.department || 'Computer Science & Engineering',
+          mobile: dbItem.mobile || '+91 98000 00000'
+        },
+        status: dbItem.status || 'pending',
+        description: dbItem.description || '',
+        remarks: dbItem.remarks || '',
+        submittedAt: dbItem.created_at ? new Date(dbItem.created_at).toLocaleDateString() : 'Today',
+        academicCategory: dbItem.category,
+        maintenanceCategory: dbItem.category,
+        building: dbItem.building,
+        floor: dbItem.floor,
+        roomNumber: dbItem.room_number,
+        location: dbItem.location,
+        subject: dbItem.subject,
+        facultyName: dbItem.faculty_name,
+        course: dbItem.course,
+        timeline: [
+          {
+            id: 'tl-1',
+            title: 'Issue Record Fetched',
+            description: 'Loaded from MySQL database academic_council',
+            timestamp: 'Database Record',
+            performedBy: 'FastAPI Backend',
+            role: 'admin',
+            status: dbItem.status || 'pending'
+          }
+        ]
+      }));
+
+      // Replace issues state with live database records from MySQL academic_council
+      setIssues(mappedDBIssues);
+    }
+  };
+
+  // Fetch DB issues on initial mount
+  useEffect(() => {
+    refreshIssuesFromDB();
+  }, []);
 
   // Dark Mode Sync
   useEffect(() => {
@@ -173,6 +243,27 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         }
       ]
     };
+
+    // Persist to FastAPI + MySQL Workbench database
+    apiService.createSingleIssue({
+      type: newIssue.type,
+      title: newIssue.title,
+      student_id: newIssue.student.id,
+      student_name: newIssue.student.name,
+      department: newIssue.student.department,
+      mobile: newIssue.student.mobile,
+      category: newIssue.academicCategory || newIssue.maintenanceCategory,
+      description: newIssue.description,
+      remarks: newIssue.remarks,
+      status: 'pending',
+      building: newIssue.building,
+      floor: newIssue.floor,
+      room_number: newIssue.roomNumber,
+      location: newIssue.location,
+      subject: newIssue.subject,
+      faculty_name: newIssue.facultyName,
+      course: newIssue.course
+    });
 
     setIssues(prev => [newIssue, ...prev]);
     addAuditLog('CREATE_COMPLAINT', newId, `Registered new ${newIssue.type} grievance for ${newIssue.student.name}`);
@@ -308,6 +399,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       setSelectedIssueId,
       activeTab,
       setActiveTab,
+      refreshIssuesFromDB,
       addIssue,
       updateIssueStatus,
       assignStaffToIssue,

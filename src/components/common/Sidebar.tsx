@@ -1,21 +1,16 @@
 import React from 'react';
 import { useApp } from '../../context/AppContext';
-import { 
-  LayoutDashboard, 
-  BookOpen, 
-  Wrench, 
-  CheckSquare, 
-  BarChart3, 
-  Users, 
-  Building2, 
-  Shield, 
-  FileSpreadsheet, 
-  History, 
-  Clock,
-  GraduationCap,
-  Bell,
-  Sun,
-  Moon,
+import {
+  LayoutDashboard,
+  BookOpen,
+  Wrench,
+  CheckSquare,
+  BarChart3,
+  Users,
+  Building2,
+  Shield,
+  FileSpreadsheet,
+  History,
   LogOut,
   X,
   PlusCircle,
@@ -37,26 +32,22 @@ interface NavItem {
   badge?: number;
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ 
+export const Sidebar: React.FC<SidebarProps> = ({
   onOpenRegisterModal,
   onLogout,
   isMobileOpen = false,
   onCloseMobile
 }) => {
-  const { 
-    currentRole, 
-    activeTab, 
-    setActiveTab, 
-    issues, 
-    isDarkMode, 
-    toggleDarkMode, 
-    notifications 
+  const {
+    currentRole,
+    activeTab,
+    setActiveTab,
+    issues
   } = useApp();
 
   const academicCount = issues.filter(i => i.type === 'academic' && i.status !== 'resolved').length;
   const maintenanceCount = issues.filter(i => i.type === 'maintenance' && i.status !== 'resolved').length;
   const verificationCount = issues.filter(i => i.status === 'verification_pending' || i.status === 'work_completed').length;
-  const unreadNotifCount = notifications.filter(n => !n.read).length;
 
   const roleTitles: Record<string, string> = {
     student_council: 'Student Council Desk',
@@ -70,23 +61,19 @@ export const Sidebar: React.FC<SidebarProps> = ({
     student_council: [
       { id: 'dashboard', label: 'Council Overview', icon: LayoutDashboard },
       { id: 'register', label: 'Register Complaint', icon: PlusCircle, action: onOpenRegisterModal },
-      { id: 'queue', label: 'Student Complaints Queue', icon: Clock, badge: issues.length },
       { id: 'bulk_export', label: 'Bulk Issue Export & Import', icon: Download },
-      { id: 'notifications', label: 'Notifications Center', icon: Bell, badge: unreadNotifCount },
       { id: 'reports', label: 'Reports & Export', icon: FileSpreadsheet }
     ],
     ad_academic: [
       { id: 'dashboard', label: 'Academic Overview', icon: LayoutDashboard },
       { id: 'academic_queue', label: 'Academic Issues Queue', icon: BookOpen, badge: academicCount },
       { id: 'bulk_export', label: 'Bulk Issue Export & Import', icon: Download },
-      { id: 'notifications', label: 'Notifications Center', icon: Bell, badge: unreadNotifCount },
       { id: 'reports', label: 'Academic Reports', icon: FileSpreadsheet }
     ],
     ad_maintenance: [
       { id: 'dashboard', label: 'Estate Overview', icon: LayoutDashboard },
       { id: 'maintenance_queue', label: 'Estate Repairs Queue', icon: Wrench, badge: maintenanceCount },
       { id: 'bulk_export', label: 'Bulk Issue Export & Import', icon: Download },
-      { id: 'notifications', label: 'Notifications Center', icon: Bell, badge: unreadNotifCount },
       { id: 'reports', label: 'Maintenance Logs', icon: FileSpreadsheet }
     ],
     ad_students: [
@@ -94,7 +81,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
       { id: 'verification', label: 'Verification & Closure', icon: CheckSquare, badge: verificationCount },
       { id: 'closed', label: 'Verified Closed History', icon: History },
       { id: 'bulk_export', label: 'Bulk Issue Export & Import', icon: Download },
-      { id: 'notifications', label: 'Notifications Center', icon: Bell, badge: unreadNotifCount },
       { id: 'reports', label: 'Generate Reports', icon: FileSpreadsheet }
     ],
     admin: [
@@ -103,7 +89,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
       { id: 'departments', label: 'Departments Directory', icon: Building2 },
       { id: 'audit_logs', label: 'System Audit Logs', icon: Shield },
       { id: 'bulk_export', label: 'Bulk Issue Export & Import', icon: Download },
-      { id: 'notifications', label: 'Notifications Center', icon: Bell, badge: unreadNotifCount },
       { id: 'reports', label: 'University Reports', icon: FileSpreadsheet }
     ]
   };
@@ -113,13 +98,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const sidebarContent = (
     <div className="flex flex-col h-full justify-between overflow-y-auto">
       <div className="space-y-6">
-        
+
         {/* Top Branding Section */}
         <div className="pb-4 border-b border-slate-200/80 dark:border-slate-800/80">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3 cursor-pointer" onClick={() => setActiveTab('dashboard')}>
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-indigo-600 flex items-center justify-center shadow-md shadow-brand-500/20 text-white shrink-0">
-                <GraduationCap className="w-6 h-6" />
+              <div className="w-11 h-11 rounded-xl bg-white dark:bg-slate-800 flex items-center justify-center shadow-md shadow-brand-500/10 shrink-0 p-1 border border-slate-200 dark:border-slate-700">
+                <img src="/simats_logo.png" alt="Saveetha SIMATS Logo" className="w-full h-full object-contain" />
               </div>
               <div>
                 <span className="text-[10px] font-bold text-brand-600 dark:text-brand-400 tracking-wider uppercase block">SIMATS University</span>
@@ -166,11 +151,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     }
                     if (onCloseMobile) onCloseMobile();
                   }}
-                  className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all ${
-                    isActive
-                      ? 'bg-gradient-to-r from-brand-600 to-indigo-600 text-white shadow-md shadow-brand-500/20'
-                      : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/70 hover:text-slate-900 dark:hover:text-slate-100'
-                  }`}
+                  className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all ${isActive
+                    ? 'bg-gradient-to-r from-brand-600 to-indigo-600 text-white shadow-md shadow-brand-500/20'
+                    : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/70 hover:text-slate-900 dark:hover:text-slate-100'
+                    }`}
                 >
                   <div className="flex items-center gap-3">
                     <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-slate-400 dark:text-slate-500'}`} />
@@ -178,9 +162,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   </div>
 
                   {item.badge !== undefined && item.badge > 0 && (
-                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                      isActive ? 'bg-white/20 text-white' : 'bg-brand-100 dark:bg-brand-950 text-brand-600 dark:text-brand-300'
-                    }`}>
+                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${isActive ? 'bg-white/20 text-white' : 'bg-brand-100 dark:bg-brand-950 text-brand-600 dark:text-brand-300'
+                      }`}>
                       {item.badge}
                     </span>
                   )}
@@ -188,27 +171,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
               );
             })}
           </nav>
-        </div>
-
-        {/* Theme Selector directly below Navigation Menu */}
-        <div className="pt-3 border-t border-slate-200/80 dark:border-slate-800/80 space-y-1">
-          <div className="px-3 mb-1">
-            <span className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">
-              Appearance Theme
-            </span>
-          </div>
-
-          <button
-            onClick={toggleDarkMode}
-            className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all border border-slate-200/80 dark:border-slate-700/80"
-          >
-            {isDarkMode ? (
-              <Moon className="w-4 h-4 text-amber-400 shrink-0" />
-            ) : (
-              <Sun className="w-4 h-4 text-brand-500 shrink-0" />
-            )}
-            <span>{isDarkMode ? 'Dark Theme' : 'Light Theme'}</span>
-          </button>
         </div>
 
       </div>
@@ -234,7 +196,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   return (
     <>
       {/* Desktop Persistent Sidebar */}
-      <aside className="w-64 shrink-0 hidden md:block glass-panel border-r border-slate-200/80 dark:border-slate-800/80 min-h-screen p-4">
+      <aside className="w-64 shrink-0 hidden md:block h-screen overflow-y-auto sticky top-0 glass-panel border-r border-slate-200/80 dark:border-slate-800/80 p-4">
         {sidebarContent}
       </aside>
 

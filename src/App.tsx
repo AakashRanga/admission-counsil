@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { AppProvider, useApp } from './context/AppContext';
 import { Sidebar } from './components/common/Sidebar';
+import { Header } from './components/common/Header';
 import { ToastContainer } from './components/common/ToastContainer';
 
 // Modals
@@ -8,6 +9,7 @@ import { RegisterComplaintModal } from './components/forms/RegisterComplaintModa
 import { AssignStaffModal } from './components/forms/AssignStaffModal';
 import { ResolutionModal } from './components/forms/ResolutionModal';
 import { IssueDetailsModal } from './components/common/IssueDetailsModal';
+import { BulkUploadModal } from './components/forms/BulkUploadModal';
 
 // Pages
 import { LoginPage } from './pages/LoginPage';
@@ -18,7 +20,6 @@ import { ADStudentsDashboard } from './pages/ADStudentsDashboard';
 import { AdminDashboard } from './pages/AdminDashboard';
 
 // Dedicated Sub-Pages
-import { ComplaintsQueuePage } from './pages/ComplaintsQueuePage';
 import { AcademicQueuePage } from './pages/AcademicQueuePage';
 import { MaintenanceQueuePage } from './pages/MaintenanceQueuePage';
 import { StudentVerificationPage } from './pages/StudentVerificationPage';
@@ -37,14 +38,29 @@ import { Menu, GraduationCap } from 'lucide-react';
 const MainLayout: React.FC = () => {
   const { currentRole, activeTab, selectedIssueId, setSelectedIssueId } = useApp();
 
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(() => {
+    return localStorage.getItem('ac_logged_in') === 'true';
+  });
   const [isRegisterOpen, setIsRegisterOpen] = useState(false);
+  const [isBulkUploadOpen, setIsBulkUploadOpen] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [assignTargetIssue, setAssignTargetIssue] = useState<GrievanceIssue | null>(null);
   const [resolutionTargetIssue, setResolutionTargetIssue] = useState<GrievanceIssue | null>(null);
 
+  const handleLoginSuccess = () => {
+    localStorage.setItem('ac_logged_in', 'true');
+    setIsLoggedIn(true);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('ac_logged_in');
+    localStorage.removeItem('ac_role');
+    localStorage.removeItem('ac_active_tab');
+    setIsLoggedIn(false);
+  };
+
   if (!isLoggedIn) {
-    return <LoginPage onLoginSuccess={() => setIsLoggedIn(true)} />;
+    return <LoginPage onLoginSuccess={handleLoginSuccess} />;
   }
 
   const renderActiveView = () => {
@@ -57,7 +73,6 @@ const MainLayout: React.FC = () => {
     if (activeTab === 'audit_logs') return <AuditLogsPage />;
 
     // 2. Dedicated Sub-queue Pages
-    if (activeTab === 'queue') return <ComplaintsQueuePage />;
     if (activeTab === 'academic_queue') return <AcademicQueuePage onOpenAssignModal={(issue) => setAssignTargetIssue(issue)} />;
     if (activeTab === 'maintenance_queue') return <MaintenanceQueuePage onOpenAssignModal={(issue) => setAssignTargetIssue(issue)} />;
     if (activeTab === 'verification') return <StudentVerificationPage onOpenResolutionModal={(issue) => setResolutionTargetIssue(issue)} />;
@@ -81,7 +96,7 @@ const MainLayout: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 flex flex-col md:flex-row font-sans transition-colors duration-200">
+    <div className="h-screen overflow-hidden bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 flex flex-col md:flex-row font-sans transition-colors duration-200">
       
       {/* Mobile Top Bar with Menu Toggle */}
       <div className="md:hidden flex items-center justify-between p-3.5 glass-panel border-b border-slate-200 dark:border-slate-800">
@@ -100,16 +115,22 @@ const MainLayout: React.FC = () => {
       </div>
 
       {/* Main Workspace Layout with Sidebar on Left */}
-      <div className="flex flex-1 w-full max-w-[1600px] mx-auto min-h-screen">
+      <div className="flex flex-1 w-full max-w-[1600px] mx-auto h-screen overflow-hidden">
         <Sidebar 
           onOpenRegisterModal={() => setIsRegisterOpen(true)} 
-          onLogout={() => setIsLoggedIn(false)}
+          onLogout={handleLogout}
           isMobileOpen={isMobileSidebarOpen}
           onCloseMobile={() => setIsMobileSidebarOpen(false)}
         />
 
-        <main className="flex-1 p-3 sm:p-6 md:p-8 overflow-y-auto min-w-0">
-          {renderActiveView()}
+        <main className="flex-1 flex flex-col h-screen overflow-hidden min-w-0">
+          <Header 
+            onToggleMobileSidebar={() => setIsMobileSidebarOpen(true)}
+            onOpenBulkUpload={() => setIsBulkUploadOpen(true)}
+          />
+          <div className="flex-1 p-3 sm:p-6 md:p-8 overflow-y-auto">
+            {renderActiveView()}
+          </div>
         </main>
       </div>
 
@@ -120,6 +141,12 @@ const MainLayout: React.FC = () => {
       <RegisterComplaintModal
         isOpen={isRegisterOpen}
         onClose={() => setIsRegisterOpen(false)}
+      />
+
+      {/* Bulk Upload CSV Modal */}
+      <BulkUploadModal
+        isOpen={isBulkUploadOpen}
+        onClose={() => setIsBulkUploadOpen(false)}
       />
 
       {/* Assign Staff / Trade Team Modal */}
