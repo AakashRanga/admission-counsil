@@ -28,7 +28,7 @@ export const IssueDetailsModal: React.FC<IssueDetailsModalProps> = ({
   onOpenAssignModal,
   onOpenResolutionModal
 }) => {
-  const { issues, updateIssueStatus } = useApp();
+  const { issues, updateIssueStatus, currentRole } = useApp();
   const [commentInput, setCommentInput] = useState('');
 
   if (!issueId) return null;
@@ -183,90 +183,94 @@ export const IssueDetailsModal: React.FC<IssueDetailsModalProps> = ({
                 </div>
               )}
 
-              {/* Assigned Staff */}
-              <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
-                    Assigned Authority / Staff
-                  </span>
-                  {issue.assignedTo ? (
-                    <div className="flex items-center gap-2 mt-1">
-                      <UserCheck className="w-4 h-4 text-emerald-500 shrink-0" />
-                      <div>
-                        <div className="text-xs font-bold text-slate-800 dark:text-slate-200">{issue.assignedTo.name}</div>
-                        <div className="text-[10px] text-slate-500">{issue.assignedTo.role} • Assigned {issue.assignedTo.assignedAt}</div>
-                      </div>
-                    </div>
-                  ) : (
-                    <span className="text-xs text-amber-600 dark:text-amber-400 font-semibold mt-1 block">
-                      Unassigned - Pending Authority Dispatch
+              {/* Assigned Staff (Only for Authorities) */}
+              {currentRole !== 'student_council' && (
+                <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
+                      Assigned Authority / Staff
                     </span>
-                  )}
-                </div>
+                    {issue.assignedTo ? (
+                      <div className="flex items-center gap-2 mt-1">
+                        <UserCheck className="w-4 h-4 text-emerald-500 shrink-0" />
+                        <div>
+                          <div className="text-xs font-bold text-slate-800 dark:text-slate-200">{issue.assignedTo.name}</div>
+                          <div className="text-[10px] text-slate-500">{issue.assignedTo.role} • Assigned {issue.assignedTo.assignedAt}</div>
+                        </div>
+                      </div>
+                    ) : (
+                      <span className="text-xs text-amber-600 dark:text-amber-400 font-semibold mt-1 block">
+                        Unassigned - Pending Authority Dispatch
+                      </span>
+                    )}
+                  </div>
 
-                {onOpenAssignModal && (
-                  <button
-                    onClick={() => {
-                      onClose();
-                      onOpenAssignModal(issue);
-                    }}
-                    className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-brand-500 text-white hover:bg-brand-600 shadow-sm shrink-0"
-                  >
-                    {issue.assignedTo ? 'Re-assign Staff' : 'Assign Staff Now'}
-                  </button>
-                )}
-              </div>
-
-              {/* Action Bar based on Role */}
-              <div className="p-4 rounded-xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 space-y-3">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300">
-                  Update Status & Add Log Entry
-                </h4>
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    placeholder="Optional log comment for status change..."
-                    value={commentInput}
-                    onChange={(e) => setCommentInput(e.target.value)}
-                    className="flex-1 px-3 py-1.5 text-xs rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 outline-none"
-                  />
-                </div>
-
-                <div className="flex flex-wrap gap-2">
-                  <button
-                    onClick={() => handleStatusChange('investigating')}
-                    className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-500 text-white hover:bg-blue-600"
-                  >
-                    Set Investigating
-                  </button>
-
-                  <button
-                    onClick={() => handleStatusChange('work_started')}
-                    className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-brand-600 text-white hover:bg-brand-700"
-                  >
-                    Work Started
-                  </button>
-
-                  <button
-                    onClick={() => handleStatusChange('work_completed')}
-                    className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-teal-600 text-white hover:bg-teal-700"
-                  >
-                    Work Completed
-                  </button>
-
-                  {onOpenResolutionModal && (
+                  {onOpenAssignModal && (
                     <button
                       onClick={() => {
                         onClose();
-                        onOpenResolutionModal(issue);
+                        onOpenAssignModal(issue);
                       }}
-                      className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-700"
+                      className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-brand-500 text-white hover:bg-brand-600 shadow-sm shrink-0"
                     >
-                      Verify & Close
+                      {issue.assignedTo ? 'Re-assign Staff' : 'Assign Staff Now'}
                     </button>
                   )}
                 </div>
-              </div>
+              )}
+
+              {/* Action Bar based on Role (Only for Authorities) */}
+              {currentRole !== 'student_council' && (
+                <div className="p-4 rounded-xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 space-y-3">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300">
+                    Update Status & Add Log Entry
+                  </h4>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      placeholder="Optional log comment for status change..."
+                      value={commentInput}
+                      onChange={(e) => setCommentInput(e.target.value)}
+                      className="flex-1 px-3 py-1.5 text-xs rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 outline-none"
+                    />
+                  </div>
+
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      onClick={() => handleStatusChange('investigating')}
+                      className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-500 text-white hover:bg-blue-600"
+                    >
+                      Set Investigating
+                    </button>
+
+                    <button
+                      onClick={() => handleStatusChange('work_started')}
+                      className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-brand-600 text-white hover:bg-brand-700"
+                    >
+                      Work Started
+                    </button>
+
+                    <button
+                      onClick={() => handleStatusChange('work_completed')}
+                      className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-teal-600 text-white hover:bg-teal-700"
+                    >
+                      Work Completed
+                    </button>
+
+                    {onOpenResolutionModal && (
+                      <button
+                        onClick={() => {
+                          onClose();
+                          onOpenResolutionModal(issue);
+                        }}
+                        className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-700"
+                      >
+                        Verify & Close
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
 
             </div>
 
