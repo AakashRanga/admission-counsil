@@ -133,12 +133,28 @@ INITIAL_GRIEVANCES = [
     }
 ]
 
+from sqlalchemy import text
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Migrates tables every time app.py runs and seeds default role users and grievances into academic_council DB."""
     print("[*] Running table auto-migrations for database: academic_council")
     Base.metadata.create_all(bind=engine)
     
+    # Auto-migrate missing columns for existing MySQL table 'grievances'
+    with engine.connect() as conn:
+        for col_name, col_type in [
+            ("assigned_staff_name", "VARCHAR(100) NULL"),
+            ("assigned_staff_mobile", "VARCHAR(30) NULL"),
+            ("special_instructions", "TEXT NULL")
+        ]:
+            try:
+                conn.execute(text(f"ALTER TABLE grievances ADD COLUMN {col_name} {col_type}"))
+                conn.commit()
+                print(f"[*] Auto-migrated: Added column '{col_name}' to MySQL grievances table.")
+            except Exception:
+                pass
+
     db = next(get_db())
     try:
         for seed_user in INITIAL_ROLE_USERS:
@@ -162,6 +178,7 @@ async def lifespan(app: FastAPI):
     finally:
         db.close()
     yield
+
 
 app = FastAPI(
     title="SIMATS Academic Council ERP Backend API",
@@ -194,40 +211,39 @@ def health_check():
 # Authentication Endpoint
 @app.post("/api/login", response_model=schemas.TokenResponse)
 def login(req: schemas.LoginRequest, db: Session = Depends(get_db)):
-    # Look up user by email or by matching role
-    user = None
-    if req.email:
-        user = db.query(models.User).filter(models.User.email == req.email).first()
+    if not req.email or not req.email.strip():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Email address is required."
+        )
     
-    if not user and req.role:
-        user = db.query(models.User).filter(models.User.role == req.role).first()
+    if not req.password:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Password is required."
+        )
+
+    # Query user by email
+    user = db.query(models.User).filter(models.User.email == req.email.strip()).first()
     
     if not user:
-        # Fallback create dynamic role user if requesting role login
-        role_names = {
-            "student_council": "Student Council Representative",
-            "ad_academic": "AD Academic Desk Officer",
-            "ad_maintenance": "AD Estate Supervisor",
-            "ad_students": "AD Welfare Officer",
-            "admin": "Admin System Director"
-        }
-        role_key = req.role or "student_council"
-        user = models.User(
-            name=role_names.get(role_key, "Authority User"),
-            email=req.email or f"{role_key}@simats.edu",
-            hashed_password=req.password or "password123",
-            role=role_key,
-            department="Academic Council Desk"
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid email. User not registered in system."
         )
-        db.add(user)
-        db.commit()
-        db.refresh(user)
+    
+    if user.hashed_password != req.password:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid password. Please check your credentials."
+        )
 
     return {
         "access_token": f"bearer-token-{user.id}-{user.role}",
         "token_type": "bearer",
         "user": user
     }
+
 
 @app.get("/api/users", response_model=List[schemas.UserResponse])
 def get_authority_users(db: Session = Depends(get_db)):
@@ -269,6 +285,47 @@ def create_bulk_grievances(payload: schemas.BulkGrievanceCreate, db: Session = D
         "items": created_items
     }
 
+@app.put("/api/issues/{issue_id}/assign", response_model=schemas.GrievanceResponse)
+def assign_staff_to_grievance(issue_id: str, payload: schemas.AssignStaffRequest, db: Session = Depends(get_db)):
+    grv = db.query(models.Grievance).filter(models.Grievance.id == issue_id).first()
+    if not grv:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Grievance with ID '{issue_id}' not found."
+        )
+
+    grv.assigned_staff_name = payload.assigned_staff_name
+    grv.assigned_staff_mobile = payload.assigned_staff_mobile
+    grv.special_instructions = payload.special_instructions
+    if grv.status == "pending":
+        grv.status = "assigned"
+
+    db.commit()
+    db.refresh(grv)
+    return grv
+
+@app.put("/api/issues/{issue_id}/status", response_model=schemas.GrievanceResponse)
+def update_grievance_status(issue_id: str, payload: schemas.UpdateStatusRequest, db: Session = Depends(get_db)):
+    grv = db.query(models.Grievance).filter(models.Grievance.id == issue_id).first()
+    if not grv:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Grievance with ID '{issue_id}' not found."
+        )
+
+    grv.status = payload.status
+    if payload.remarks:
+        if grv.remarks:
+            grv.remarks = f"{grv.remarks} | {payload.remarks}"
+        else:
+            grv.remarks = payload.remarks
+
+    db.commit()
+    db.refresh(grv)
+    return grv
+
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("app:app", host="0.0.0.0", port=8000, reload=True)
+

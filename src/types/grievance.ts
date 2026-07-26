@@ -31,11 +31,13 @@ export interface StudentInfo {
 }
 
 export interface AssignedStaff {
-  id: string;
+  id?: string;
   name: string;
-  role: string;
+  mobile?: string;
+  role?: string;
   department?: string;
   trade?: string;
+  specialInstructions?: string;
   assignedAt: string;
 }
 

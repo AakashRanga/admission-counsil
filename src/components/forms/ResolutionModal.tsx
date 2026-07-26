@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import type { GrievanceIssue } from '../../types/grievance';
-import { X, CheckCircle2, RotateCcw, Star, ThumbsUp, ThumbsDown, MessageSquare } from 'lucide-react';
+import { X, CheckCircle2, RotateCcw, Star, ThumbsUp, ThumbsDown, MessageSquare, User, Phone, FileText, UserCheck, Info } from 'lucide-react';
 
 interface ResolutionModalProps {
   issue: GrievanceIssue | null;
@@ -9,7 +9,7 @@ interface ResolutionModalProps {
 }
 
 export const ResolutionModal: React.FC<ResolutionModalProps> = ({ issue, onClose }) => {
-  const { addStudentFeedback } = useApp();
+  const { addStudentFeedback, currentRole } = useApp();
 
   const [satisfied, setSatisfied] = useState<boolean>(true);
   const [rating, setRating] = useState<number>(5);
@@ -17,7 +17,8 @@ export const ResolutionModal: React.FC<ResolutionModalProps> = ({ issue, onClose
   const [finalRemarks, setFinalRemarks] = useState('');
   const [actionType, setActionType] = useState<'close' | 'reopen'>('close');
 
-  if (!issue) return null;
+  if (!issue || currentRole !== 'ad_students') return null;
+
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,7 +36,7 @@ export const ResolutionModal: React.FC<ResolutionModalProps> = ({ issue, onClose
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm p-3 sm:p-6 flex min-h-full items-end sm:items-center justify-center">
-      <div className="relative w-full max-w-lg glass-panel rounded-2xl border border-slate-200 dark:border-slate-700 shadow-2xl my-auto flex flex-col animate-in fade-in zoom-in-95 max-h-[90vh]">
+      <div className="relative w-full max-w-xl glass-panel rounded-2xl border border-slate-200 dark:border-slate-700 shadow-2xl my-auto flex flex-col animate-in fade-in zoom-in-95 max-h-[90vh]">
         
         <div className="flex items-center justify-between p-4 sm:p-5 border-b border-slate-200 dark:border-slate-700 shrink-0">
           <div className="flex items-center gap-2.5">
@@ -55,6 +56,61 @@ export const ResolutionModal: React.FC<ResolutionModalProps> = ({ issue, onClose
         </div>
 
         <form onSubmit={handleSubmit} className="p-4 sm:p-5 space-y-4 overflow-y-auto flex-1">
+          
+          {/* Detailed Grievance Ticket Summary Card */}
+          <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-extrabold uppercase tracking-wider text-brand-600 dark:text-brand-400 px-2 py-0.5 rounded bg-brand-50 dark:bg-brand-950">
+                {issue.type} Grievance • {issue.id}
+              </span>
+              <span className="text-xs font-semibold px-2 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300">
+                Status: {issue.status.replace('_', ' ').toUpperCase()}
+              </span>
+            </div>
+
+            <h4 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100">
+              {issue.title}
+            </h4>
+
+            {/* Student & Assigned Staff Summary Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs border-t border-b border-slate-200 dark:border-slate-700 py-2.5">
+              <div>
+                <span className="text-[10px] font-bold text-slate-400 block uppercase">Student Info</span>
+                <span className="font-semibold text-slate-800 dark:text-slate-200">{issue.student.name}</span>
+                <div className="text-[11px] text-slate-500">{issue.student.department} • {issue.student.mobile}</div>
+              </div>
+
+              <div>
+                <span className="text-[10px] font-bold text-slate-400 block uppercase">Assigned Staff</span>
+                {issue.assignedTo ? (
+                  <div>
+                    <span className="font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                      <UserCheck className="w-3.5 h-3.5" />
+                      {issue.assignedTo.name}
+                    </span>
+                    <div className="text-[11px] text-slate-500">Contact: {issue.assignedTo.mobile || 'N/A'}</div>
+                  </div>
+                ) : (
+                  <span className="text-slate-400 italic">No staff assigned</span>
+                )}
+              </div>
+            </div>
+
+            {/* Special Instructions if available */}
+            {issue.assignedTo?.specialInstructions && (
+              <div className="text-xs bg-amber-50 dark:bg-amber-950/30 p-2 rounded-lg border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-300">
+                <span className="font-bold">Special Instructions: </span>
+                <span>{issue.assignedTo.specialInstructions}</span>
+              </div>
+            )}
+
+            {/* Description */}
+            <div className="text-xs text-slate-600 dark:text-slate-300">
+              <span className="font-bold block text-[10px] text-slate-400 uppercase">Description</span>
+              <p className="line-clamp-2 italic">{issue.description}</p>
+            </div>
+          </div>
+
           
           {/* Action Choice: Close vs Reopen */}
           <div>

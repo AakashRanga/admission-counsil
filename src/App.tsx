@@ -36,7 +36,7 @@ import type { GrievanceIssue } from './types/grievance';
 import { Menu, GraduationCap } from 'lucide-react';
 
 const MainLayout: React.FC = () => {
-  const { currentRole, activeTab, selectedIssueId, setSelectedIssueId } = useApp();
+  const { currentRole, activeTab, setActiveTab, selectedIssueId, setSelectedIssueId } = useApp();
 
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(() => {
     return localStorage.getItem('ac_logged_in') === 'true';
@@ -49,6 +49,7 @@ const MainLayout: React.FC = () => {
 
   const handleLoginSuccess = () => {
     localStorage.setItem('ac_logged_in', 'true');
+    setActiveTab('dashboard');
     setIsLoggedIn(true);
   };
 
@@ -56,8 +57,10 @@ const MainLayout: React.FC = () => {
     localStorage.removeItem('ac_logged_in');
     localStorage.removeItem('ac_role');
     localStorage.removeItem('ac_active_tab');
+    setActiveTab('dashboard');
     setIsLoggedIn(false);
   };
+
 
   if (!isLoggedIn) {
     return <LoginPage onLoginSuccess={handleLoginSuccess} />;

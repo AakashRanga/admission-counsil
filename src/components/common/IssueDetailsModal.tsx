@@ -257,17 +257,18 @@ export const IssueDetailsModal: React.FC<IssueDetailsModalProps> = ({
                       Work Completed
                     </button>
 
-                    {onOpenResolutionModal && (
+                    {currentRole === 'ad_students' && onOpenResolutionModal && (
                       <button
                         onClick={() => {
                           onClose();
                           onOpenResolutionModal(issue);
                         }}
-                        className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-700"
+                        className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-700 shadow-md shadow-emerald-500/20"
                       >
                         Verify & Close
                       </button>
                     )}
+
                   </div>
                 </div>
               )}

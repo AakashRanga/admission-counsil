@@ -68,7 +68,10 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const setCurrentRole = (role: UserRole) => {
     setCurrentRoleState(role);
     localStorage.setItem('ac_role', role);
+    setActiveTabState('dashboard');
+    localStorage.setItem('ac_active_tab', 'dashboard');
   };
+
 
   const [activeTab, setActiveTabState] = useState<string>(() => {
     return localStorage.getItem('ac_active_tab') || 'dashboard';
@@ -98,46 +101,134 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const refreshIssuesFromDB = async () => {
     const dbData = await apiService.getIssues();
     if (dbData && Array.isArray(dbData) && dbData.length > 0) {
-      const mappedDBIssues: GrievanceIssue[] = dbData.map((dbItem: any) => ({
-        id: dbItem.id,
-        type: dbItem.type || 'academic',
-        title: dbItem.title,
-        student: {
-          id: dbItem.student_id || '2024STU101',
-          name: dbItem.student_name || 'Student',
-          department: dbItem.department || 'Computer Science & Engineering',
-          mobile: dbItem.mobile || '+91 98000 00000'
-        },
-        status: dbItem.status || 'pending',
-        description: dbItem.description || '',
-        remarks: dbItem.remarks || '',
-        submittedAt: dbItem.created_at ? new Date(dbItem.created_at).toLocaleDateString() : 'Today',
-        academicCategory: dbItem.category,
-        maintenanceCategory: dbItem.category,
-        building: dbItem.building,
-        floor: dbItem.floor,
-        roomNumber: dbItem.room_number,
-        location: dbItem.location,
-        subject: dbItem.subject,
-        facultyName: dbItem.faculty_name,
-        course: dbItem.course,
-        timeline: [
-          {
-            id: 'tl-1',
-            title: 'Issue Record Fetched',
-            description: 'Loaded from MySQL database academic_council',
-            timestamp: 'Database Record',
-            performedBy: 'FastAPI Backend',
-            role: 'admin',
-            status: dbItem.status || 'pending'
-          }
-        ]
-      }));
+      const mappedDBIssues: GrievanceIssue[] = dbData.map((dbItem: any) => {
+        const currentStatus = dbItem.status || 'pending';
+        const assignedTo = dbItem.assigned_staff_name ? {
+          name: dbItem.assigned_staff_name,
+          mobile: dbItem.assigned_staff_mobile || '',
+          specialInstructions: dbItem.special_instructions || '',
+          assignedAt: 'Database Record'
+        } : undefined;
+
+        // Build clean milestone timeline (Ticket Registered -> Staff Assigned -> Under Investigation -> Work Started -> Work Completed -> Closed)
+        const timelineEntries: any[] = [];
+
+        // Step 1: Ticket Registered
+        timelineEntries.push({
+          id: `tl-created-${dbItem.id}`,
+          title: 'Ticket Registered',
+          description: 'Grievance ticket created in database.',
+          timestamp: dbItem.created_at ? new Date(dbItem.created_at).toLocaleDateString() : 'Registered',
+          performedBy: 'STUDENT PORTAL',
+          role: 'student_council',
+          status: 'pending'
+        });
+
+        // Step 2: Staff Assigned (if assigned)
+        if (assignedTo) {
+          timelineEntries.push({
+            id: `tl-assign-${dbItem.id}`,
+            title: 'Staff Assigned',
+            description: `Assigned to ${assignedTo.name} (Contact: ${assignedTo.mobile || 'N/A'}). ${assignedTo.specialInstructions ? `Notes: ${assignedTo.specialInstructions}` : ''}`,
+            timestamp: 'Assigned',
+            performedBy: 'AUTHORITY DESK',
+            role: 'ad_academic',
+            status: 'assigned'
+          });
+        }
+
+        // Step 3: Under Investigation
+        const isInvestigatingOrBeyond = ['investigating', 'work_started', 'work_completed', 'verification_pending', 'resolved'].includes(currentStatus);
+        if (isInvestigatingOrBeyond) {
+          timelineEntries.push({
+            id: `tl-inv-${dbItem.id}`,
+            title: 'Under Investigation',
+            description: 'Authority team initiated detailed investigation of grievance.',
+            timestamp: 'In Progress',
+            performedBy: 'AUTHORITY DESK',
+            role: 'ad_academic',
+            status: 'investigating'
+          });
+        }
+
+        // Step 4: Work Started
+        const isWorkStartedOrBeyond = ['work_started', 'work_completed', 'verification_pending', 'resolved'].includes(currentStatus);
+        if (isWorkStartedOrBeyond) {
+          timelineEntries.push({
+            id: `tl-started-${dbItem.id}`,
+            title: 'Work Started',
+            description: 'Action and resolution work commenced on site/portal.',
+            timestamp: 'In Progress',
+            performedBy: 'ASSIGNED STAFF',
+            role: 'ad_academic',
+            status: 'work_started'
+          });
+        }
+
+        // Step 5: Work Completed
+        const isWorkCompletedOrBeyond = ['work_completed', 'verification_pending', 'resolved'].includes(currentStatus);
+        if (isWorkCompletedOrBeyond) {
+          timelineEntries.push({
+            id: `tl-completed-${dbItem.id}`,
+            title: 'Work Completed',
+            description: 'Resolution work completed. Forwarded to AD Students for verification.',
+            timestamp: 'Completed',
+            performedBy: 'ASSIGNED STAFF',
+            role: 'ad_academic',
+            status: 'work_completed'
+          });
+        }
+
+        // Step 6: Ticket Closed & Verified by AD Students
+        if (currentStatus === 'resolved') {
+          timelineEntries.push({
+            id: `tl-resolved-${dbItem.id}`,
+            title: 'Ticket Closed & Verified',
+            description: 'Final verification completed with student. Ticket closed by AD Students Welfare.',
+            timestamp: 'Closed',
+            performedBy: 'AD STUDENTS WELFARE',
+            role: 'ad_students',
+            status: 'resolved'
+          });
+        }
+
+        // Reverse so newest milestone appears at the top
+        timelineEntries.reverse();
+
+        return {
+          id: dbItem.id,
+          type: dbItem.type || 'academic',
+          title: dbItem.title,
+          student: {
+            id: dbItem.student_id || '2024STU101',
+            name: dbItem.student_name || 'Student',
+            department: dbItem.department || 'Computer Science & Engineering',
+            mobile: dbItem.mobile || '+91 98000 00000'
+          },
+          status: currentStatus,
+          description: dbItem.description || '',
+          remarks: dbItem.remarks || '',
+          submittedAt: dbItem.created_at ? new Date(dbItem.created_at).toLocaleDateString() : 'Today',
+          academicCategory: dbItem.category,
+          maintenanceCategory: dbItem.category,
+          building: dbItem.building,
+          floor: dbItem.floor,
+          roomNumber: dbItem.room_number,
+          location: dbItem.location,
+          subject: dbItem.subject,
+          facultyName: dbItem.faculty_name,
+          course: dbItem.course,
+          assignedTo,
+          timeline: timelineEntries
+        };
+      });
 
       // Replace issues state with live database records from MySQL academic_council
       setIssues(mappedDBIssues);
     }
   };
+
+
 
   // Fetch DB issues on initial mount
   useEffect(() => {
@@ -274,6 +365,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const updateIssueStatus = (issueId: string, status: IssueStatus, comment?: string) => {
     const nowStr = new Date().toLocaleString([], { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
 
+    // Persist status and remarks log to MySQL backend database via REST API
+    apiService.updateStatus(issueId, status, comment);
+
     setIssues(prev => prev.map(issue => {
       if (issue.id !== issueId) return issue;
 
@@ -307,19 +401,28 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     }));
 
     addAuditLog('UPDATE_STATUS', issueId, `Changed status of ${issueId} to ${status}`);
-    addToast('info', 'Status Updated', `Issue ${issueId} status is now ${status.replace('_', ' ')}.`);
+    addToast('info', 'Status Updated', `Issue ${issueId} status is now ${status.replace('_', ' ')}. Saved to DB.`);
   };
+
 
   const assignStaffToIssue = (issueId: string, staff: AssignedStaff) => {
     const nowStr = new Date().toLocaleString([], { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
 
+    // Persist to backend database via REST API
+    apiService.assignStaff(issueId, {
+      assigned_staff_name: staff.name,
+      assigned_staff_mobile: staff.mobile || '',
+      special_instructions: staff.specialInstructions || ''
+    });
+
     setIssues(prev => prev.map(issue => {
       if (issue.id !== issueId) return issue;
 
+      const roleOrMobile = staff.mobile ? `Contact: ${staff.mobile}` : (staff.role || 'Staff');
       const newTimelineItem = {
         id: 'tl-' + Date.now(),
         title: 'Staff Assigned',
-        description: `Assigned to ${staff.name} (${staff.role}).`,
+        description: `Assigned to ${staff.name} (${roleOrMobile}). Notes: ${staff.specialInstructions || 'None'}`,
         timestamp: nowStr,
         performedBy: currentRole.replace('_', ' ').toUpperCase(),
         role: currentRole,
@@ -335,8 +438,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     }));
 
     addAuditLog('ASSIGN_STAFF', issueId, `Assigned ${staff.name} to ${issueId}`);
-    addToast('success', 'Staff Assigned', `${staff.name} assigned to handle ${issueId}.`);
+    addToast('success', 'Staff Assigned', `${staff.name} assigned to handle ${issueId}. Saved to DB.`);
   };
+
 
   const addStudentFeedback = (
     issueId: string, 
@@ -344,10 +448,13 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     closeOrReopen: 'close' | 'reopen',
     finalRemarks?: string
   ) => {
-    const nowStr = new Date().toLocaleString([], { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
     const targetStatus: IssueStatus = closeOrReopen === 'close' ? 'resolved' : 'reopened';
 
+    // Persist final closure status to database API
+    apiService.updateStatus(issueId, targetStatus, finalRemarks || feedback.comments);
+
     setIssues(prev => prev.map(issue => {
+
       if (issue.id !== issueId) return issue;
 
       const newTimelineItem = {

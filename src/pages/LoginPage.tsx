@@ -5,7 +5,9 @@ import { apiService } from '../services/api';
 import {
   Lock,
   Mail,
-  ArrowRight
+  ArrowRight,
+  AlertCircle,
+  KeyRound
 } from 'lucide-react';
 
 interface LoginPageProps {
@@ -17,39 +19,51 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  // Infer user role based on email pattern or backend result
-  const detectRoleFromEmail = (userEmail: string): UserRole => {
-    const e = userEmail.toLowerCase();
-    if (e.includes('academic')) return 'ad_academic';
-    if (e.includes('estate') || e.includes('maint')) return 'ad_maintenance';
-    if (e.includes('welfare') || e.includes('student')) return 'ad_students';
-    if (e.includes('admin')) return 'admin';
-    return 'student_council';
+  const DEMO_ACCOUNTS = [
+    { role: 'Student Council', email: 'council@simats.edu', pass: 'council123' },
+    { role: 'AD Academic', email: 'academic@simats.edu', pass: 'academic123' },
+    { role: 'AD Maintenance', email: 'estate@simats.edu', pass: 'estate123' },
+    { role: 'AD Welfare', email: 'welfare@simats.edu', pass: 'welfare123' },
+    { role: 'Admin', email: 'admin@simats.edu', pass: 'admin123' },
+  ];
+
+  const handleQuickFill = (demoEmail: string, demoPass: string) => {
+    setEmail(demoEmail);
+    setPassword(demoPass);
+    setErrorMessage(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email.trim() || !password.trim()) {
-      alert('Please enter both Email and Password.');
+    setErrorMessage(null);
+
+    const trimmedEmail = email.trim();
+    const trimmedPassword = password.trim();
+
+    if (!trimmedEmail || !trimmedPassword) {
+      setErrorMessage('Please enter both Email Address and Password.');
       return;
     }
 
     setIsLoading(true);
-    let targetRole = detectRoleFromEmail(email);
 
     try {
-      const result = await apiService.login({ email, password, role: targetRole });
+      const result = await apiService.login({ email: trimmedEmail, password: trimmedPassword });
       if (result && result.user && result.user.role) {
-        targetRole = result.user.role as UserRole;
         addToast('success', 'Authentication Successful', `Welcome ${result.user.name}`);
+        setCurrentRole(result.user.role as UserRole);
+        onLoginSuccess();
+      } else {
+        throw new Error('Authentication failed. User profile could not be loaded.');
       }
-    } catch {
-      // Fallback to client role routing
+    } catch (err: any) {
+      const msg = err?.message || 'Invalid email or password. Please try again.';
+      setErrorMessage(msg);
+      addToast('error', 'Login Failed', msg);
     } finally {
       setIsLoading(false);
-      setCurrentRole(targetRole);
-      onLoginSuccess();
     }
   };
 
@@ -93,6 +107,14 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
           </p>
         </div>
 
+        {/* Error Alert Box */}
+        {errorMessage && (
+          <div className="mb-4 p-3.5 rounded-2xl bg-red-500/10 border border-red-500/30 text-red-600 dark:text-red-400 text-xs font-medium flex items-start gap-2.5 shadow-sm animate-shake">
+            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-red-500" />
+            <div className="leading-snug">{errorMessage}</div>
+          </div>
+        )}
+
         {/* Credentials Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -105,8 +127,11 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
               required
               placeholder="Enter Your Email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-3.5 py-2.5 text-xs rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 outline-none text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-brand-500/50"
+              onChange={(e) => {
+                setEmail(e.target.value);
+                setErrorMessage(null);
+              }}
+              className="w-full px-3.5 py-2.5 text-xs rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 outline-none text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-brand-500/50 transition-all"
             />
           </div>
 
@@ -120,24 +145,48 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
               required
               placeholder="Enter Password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-3.5 py-2.5 text-xs rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 outline-none text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-brand-500/50"
+              onChange={(e) => {
+                setPassword(e.target.value);
+                setErrorMessage(null);
+              }}
+              className="w-full px-3.5 py-2.5 text-xs rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 outline-none text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-brand-500/50 transition-all"
             />
           </div>
 
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full py-3 rounded-xl font-bold text-xs bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-700 hover:to-indigo-700 text-white shadow-lg shadow-brand-500/25 transition-all transform hover:-translate-y-0.5 flex items-center justify-center gap-2 disabled:opacity-50 mt-2"
+            className="w-full py-3 rounded-xl font-bold text-xs bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-700 hover:to-indigo-700 text-white shadow-lg shadow-brand-500/25 transition-all transform hover:-translate-y-0.5 flex items-center justify-center gap-2 disabled:opacity-50 mt-2 cursor-pointer"
           >
             <span>{isLoading ? 'Authenticating...' : 'Sign In'}</span>
             <ArrowRight className="w-4 h-4" />
           </button>
         </form>
 
-      </div>
+        {/* System Credentials Reference */}
+        <div className="mt-6 pt-5 border-t border-slate-200 dark:border-slate-800">
+          <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-2.5">
+            <KeyRound className="w-3.5 h-3.5 text-brand-500" />
+            <span>Test Role Accounts (Click to Auto-fill):</span>
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {DEMO_ACCOUNTS.map((acc) => (
+              <button
+                key={acc.role}
+                type="button"
+                onClick={() => handleQuickFill(acc.email, acc.pass)}
+                className="px-2.5 py-1 text-[10px] font-semibold rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-brand-50 dark:hover:bg-brand-950/40 text-slate-600 dark:text-slate-300 hover:text-brand-600 dark:hover:text-brand-400 border border-slate-200 dark:border-slate-700 hover:border-brand-300 dark:hover:border-brand-800 transition-colors"
+                title={`${acc.email} / ${acc.pass}`}
+              >
+                {acc.role}
+              </button>
+            ))}
+          </div>
+        </div>
 
+      </div>
 
     </div>
   );
 };
+

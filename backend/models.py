@@ -44,5 +44,11 @@ class Grievance(Base):
     faculty_name = Column(String(100), nullable=True)
     course = Column(String(100), nullable=True)
 
+    # Assigned Staff Details
+    assigned_staff_name = Column(String(100), nullable=True)
+    assigned_staff_mobile = Column(String(30), nullable=True)
+    special_instructions = Column(Text, nullable=True)
+
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
+

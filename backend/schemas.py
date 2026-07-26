@@ -47,6 +47,19 @@ class GrievanceBase(BaseModel):
     subject: Optional[str] = None
     faculty_name: Optional[str] = None
     course: Optional[str] = None
+    assigned_staff_name: Optional[str] = None
+    assigned_staff_mobile: Optional[str] = None
+    special_instructions: Optional[str] = None
+
+class AssignStaffRequest(BaseModel):
+    assigned_staff_name: str
+    assigned_staff_mobile: str
+    special_instructions: Optional[str] = None
+
+class UpdateStatusRequest(BaseModel):
+    status: str
+    remarks: Optional[str] = None
+
 
 class GrievanceCreate(GrievanceBase):
     pass
@@ -66,4 +79,5 @@ class BulkGrievanceResponse(BaseModel):
     status: str
     count: int
     items: List[GrievanceResponse]
+
 
