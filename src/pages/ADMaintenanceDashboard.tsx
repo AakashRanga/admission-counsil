@@ -54,7 +54,7 @@ export const ADMaintenanceDashboard: React.FC<ADMaintenanceDashboardProps> = ({ 
           <div>
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 text-xs font-semibold mb-2 border border-amber-500/30">
               <Wrench className="w-3.5 h-3.5" />
-              Associate Dean Estate & Maintenance Operations
+              Associate Dean & Maintenance Operations
             </div>
             <h1 className="text-xl font-extrabold tracking-tight">
               Campus Infrastructure & Maintenance Command Center

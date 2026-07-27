@@ -49,6 +49,37 @@ class Grievance(Base):
     assigned_staff_mobile = Column(String(30), nullable=True)
     special_instructions = Column(Text, nullable=True)
 
+    # Verification & Student Feedback Details
+    rating = Column(Integer, nullable=True)
+    satisfied = Column(Boolean, nullable=True)
+    feedback_comments = Column(Text, nullable=True)
+    final_remarks = Column(Text, nullable=True)
+    closed_at = Column(String(100), nullable=True)
+
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
+
+
+class Department(Base):
+    __tablename__ = "departments"
+
+    id = Column(String(50), primary_key=True, index=True)
+    name = Column(String(100), nullable=False)
+    code = Column(String(20), nullable=False)
+    head_name = Column(String(100), nullable=False)
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+
+
+class AuditLog(Base):
+    __tablename__ = "audit_logs"
+
+    id = Column(String(50), primary_key=True, index=True)
+    action = Column(String(50), nullable=False)
+    performed_by = Column(String(100), nullable=False)
+    role = Column(String(50), nullable=False)
+    target_id = Column(String(50), nullable=True)
+    timestamp = Column(String(100), nullable=False)
+    details = Column(Text, nullable=False)
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+
 

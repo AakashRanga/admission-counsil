@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import type { GrievanceIssue } from '../types/grievance';
 import { StatusBadge } from '../components/common/StatusBadge';
+import { TablePagination } from '../components/common/TablePagination';
+import { TableSkeleton } from '../components/common/TableSkeleton';
 import { 
   FileText, 
   Clock, 
@@ -21,8 +23,10 @@ interface DashboardProps {
 }
 
 export const StudentCouncilDashboard: React.FC<DashboardProps> = ({ onOpenRegisterModal }) => {
-  const { issues, setSelectedIssueId, searchQuery, setSearchQuery, refreshIssuesFromDB, addToast } = useApp();
+  const { issues, isLoading, setSelectedIssueId, searchQuery, setSearchQuery, refreshIssuesFromDB, addToast } = useApp();
   const [isSyncing, setIsSyncing] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 10;
 
   const handleSyncDB = async () => {
     setIsSyncing(true);
@@ -73,11 +77,35 @@ export const StudentCouncilDashboard: React.FC<DashboardProps> = ({ onOpenRegist
     return matchesSearch && matchesType && matchesStatus && matchesDepartment;
   });
 
+  const totalPages = Math.ceil(filteredIssues.length / pageSize) || 1;
+  const paginatedIssues = filteredIssues.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+
+  const handleSearchChange = (val: string) => {
+    setSearchQuery(val);
+    setCurrentPage(1);
+  };
+
+  const handleTypeChange = (val: string) => {
+    setFilterType(val);
+    setCurrentPage(1);
+  };
+
+  const handleStatusChange = (val: string) => {
+    setFilterStatus(val);
+    setCurrentPage(1);
+  };
+
+  const handleDepartmentChange = (val: string) => {
+    setFilterDepartment(val);
+    setCurrentPage(1);
+  };
+
   const resetFilters = () => {
     setSearchQuery('');
     setFilterType('all');
     setFilterStatus('all');
     setFilterDepartment('all');
+    setCurrentPage(1);
   };
 
   const isFiltered = searchQuery !== '' || filterType !== 'all' || filterStatus !== 'all' || filterDepartment !== 'all';
@@ -110,7 +138,7 @@ export const StudentCouncilDashboard: React.FC<DashboardProps> = ({ onOpenRegist
       {/* Overview Stat Cards (Interactive Filter Triggers) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div 
-          onClick={() => { setFilterStatus('all'); setFilterType('all'); setFilterDepartment('all'); }}
+          onClick={() => { handleStatusChange('all'); handleTypeChange('all'); handleDepartmentChange('all'); }}
           className={`glass-card p-4 rounded-2xl border cursor-pointer transition-all ${
             filterStatus === 'all' && filterType === 'all' && filterDepartment === 'all'
               ? 'border-brand-500 ring-2 ring-brand-500/20'
@@ -130,7 +158,7 @@ export const StudentCouncilDashboard: React.FC<DashboardProps> = ({ onOpenRegist
         </div>
 
         <div 
-          onClick={() => setFilterStatus('pending')}
+          onClick={() => handleStatusChange('pending')}
           className={`glass-card p-4 rounded-2xl border cursor-pointer transition-all ${
             filterStatus === 'pending'
               ? 'border-amber-500 ring-2 ring-amber-500/20'
@@ -150,7 +178,7 @@ export const StudentCouncilDashboard: React.FC<DashboardProps> = ({ onOpenRegist
         </div>
 
         <div 
-          onClick={() => setFilterStatus('in_resolution')}
+          onClick={() => handleStatusChange('in_resolution')}
           className={`glass-card p-4 rounded-2xl border cursor-pointer transition-all ${
             filterStatus === 'in_resolution'
               ? 'border-blue-500 ring-2 ring-blue-500/20'
@@ -170,7 +198,7 @@ export const StudentCouncilDashboard: React.FC<DashboardProps> = ({ onOpenRegist
         </div>
 
         <div 
-          onClick={() => setFilterStatus('resolved')}
+          onClick={() => handleStatusChange('resolved')}
           className={`glass-card p-4 rounded-2xl border cursor-pointer transition-all ${
             filterStatus === 'resolved'
               ? 'border-emerald-500 ring-2 ring-emerald-500/20'
@@ -235,7 +263,7 @@ export const StudentCouncilDashboard: React.FC<DashboardProps> = ({ onOpenRegist
                 type="text"
                 placeholder="Search ID, name, dept..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => handleSearchChange(e.target.value)}
                 className="w-full pl-8 pr-3 py-1.5 text-xs rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 outline-none text-slate-800 dark:text-slate-100"
               />
             </div>
@@ -243,18 +271,18 @@ export const StudentCouncilDashboard: React.FC<DashboardProps> = ({ onOpenRegist
             {/* Issue Type Filter */}
             <select
               value={filterType}
-              onChange={(e) => setFilterType(e.target.value)}
+              onChange={(e) => handleTypeChange(e.target.value)}
               className="px-3 py-1.5 text-xs rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 outline-none text-slate-800 dark:text-slate-100"
             >
               <option value="all">All Issue Types</option>
               <option value="academic">Academic Grievance</option>
-              <option value="maintenance">Estate Maintenance</option>
+              <option value="maintenance">Maintenance</option>
             </select>
 
             {/* Status Filter */}
             <select
               value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
+              onChange={(e) => handleStatusChange(e.target.value)}
               className="px-3 py-1.5 text-xs rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 outline-none text-slate-800 dark:text-slate-100"
             >
               <option value="all">All Statuses</option>
@@ -270,7 +298,7 @@ export const StudentCouncilDashboard: React.FC<DashboardProps> = ({ onOpenRegist
             {/* Department Filter */}
             <select
               value={filterDepartment}
-              onChange={(e) => setFilterDepartment(e.target.value)}
+              onChange={(e) => handleDepartmentChange(e.target.value)}
               className="px-3 py-1.5 text-xs rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 outline-none text-slate-800 dark:text-slate-100"
             >
               <option value="all">All Departments</option>
@@ -283,64 +311,79 @@ export const StudentCouncilDashboard: React.FC<DashboardProps> = ({ onOpenRegist
         </div>
 
         {/* Complaints Table */}
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs min-w-[700px]">
-            <thead>
-              <tr className="border-b border-slate-200 dark:border-slate-800 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                <th className="py-2.5 px-3">Ticket ID</th>
-                <th className="py-2.5 px-3">Student Name</th>
-                <th className="py-2.5 px-3">Department</th>
-                <th className="py-2.5 px-3">Category & Title</th>
-                <th className="py-2.5 px-3">Submitted Date</th>
-                <th className="py-2.5 px-3">Status</th>
-                <th className="py-2.5 px-3 text-right">Action</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-              {filteredIssues.length === 0 ? (
-                <tr>
-                  <td colSpan={7} className="py-10 text-center text-slate-400 text-xs">
-                    No grievance tickets found matching the selected filters.
-                  </td>
-                </tr>
-              ) : (
-                filteredIssues.map((issue: GrievanceIssue) => (
-                  <tr key={issue.id} className="hover:bg-slate-50/60 dark:hover:bg-slate-800/40 transition-colors">
-                    <td className="py-3 px-3 font-mono font-bold text-brand-600 dark:text-brand-400">
-                      {issue.id}
-                    </td>
-                    <td className="py-3 px-3">
-                      <div className="font-semibold text-slate-800 dark:text-slate-200">{issue.student.name}</div>
-                      <div className="text-[10px] text-slate-400 font-mono">{issue.student.id}</div>
-                    </td>
-                    <td className="py-3 px-3 text-slate-600 dark:text-slate-400">
-                      {issue.student.department}
-                    </td>
-                    <td className="py-3 px-3 max-w-xs">
-                      <div className="font-medium text-slate-800 dark:text-slate-200 truncate">{issue.title}</div>
-                      <div className="text-[10px] text-slate-400 uppercase">{issue.type}</div>
-                    </td>
-                    <td className="py-3 px-3 text-slate-500 font-mono text-[11px]">
-                      {issue.submittedAt}
-                    </td>
-                    <td className="py-3 px-3">
-                      <StatusBadge status={issue.status} />
-                    </td>
-                    <td className="py-3 px-3 text-right">
-                      <button
-                        onClick={() => setSelectedIssueId(issue.id)}
-                        className="px-3 py-1.5 rounded-lg bg-brand-500 text-white hover:bg-brand-600 text-xs font-semibold shadow-sm inline-flex items-center gap-1"
-                      >
-                        <span>View Details</span>
-                        <ArrowUpRight className="w-3.5 h-3.5" />
-                      </button>
-                    </td>
+        {isLoading ? (
+          <TableSkeleton rows={5} cols={7} />
+        ) : (
+          <div className="space-y-4">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs min-w-[700px]">
+                <thead>
+                  <tr className="border-b border-slate-200 dark:border-slate-800 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                    <th className="py-2.5 px-3">Ticket ID</th>
+                    <th className="py-2.5 px-3">Student Name</th>
+                    <th className="py-2.5 px-3">Department</th>
+                    <th className="py-2.5 px-3">Category & Title</th>
+                    <th className="py-2.5 px-3">Submitted Date</th>
+                    <th className="py-2.5 px-3">Status</th>
+                    <th className="py-2.5 px-3 text-right">Action</th>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+                </thead>
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                  {paginatedIssues.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} className="py-10 text-center text-slate-400 text-xs">
+                        No grievance tickets found matching the selected filters.
+                      </td>
+                    </tr>
+                  ) : (
+                    paginatedIssues.map((issue: GrievanceIssue) => (
+                      <tr key={issue.id} className="hover:bg-slate-50/60 dark:hover:bg-slate-800/40 transition-colors">
+                        <td className="py-3 px-3 font-mono font-bold text-brand-600 dark:text-brand-400">
+                          {issue.id}
+                        </td>
+                        <td className="py-3 px-3">
+                          <div className="font-semibold text-slate-800 dark:text-slate-200">{issue.student.name}</div>
+                          <div className="text-[10px] text-slate-400 font-mono">{issue.student.id}</div>
+                        </td>
+                        <td className="py-3 px-3 text-slate-600 dark:text-slate-400">
+                          {issue.student.department}
+                        </td>
+                        <td className="py-3 px-3 max-w-xs">
+                          <div className="font-medium text-slate-800 dark:text-slate-200 truncate">{issue.title}</div>
+                          <div className="text-[10px] text-slate-400 uppercase">{issue.type}</div>
+                        </td>
+                        <td className="py-3 px-3 text-slate-500 font-mono text-[11px]">
+                          {issue.submittedAt}
+                        </td>
+                        <td className="py-3 px-3">
+                          <StatusBadge status={issue.status} />
+                        </td>
+                        <td className="py-3 px-3 text-right">
+                          <button
+                            onClick={() => setSelectedIssueId(issue.id)}
+                            className="px-3 py-1.5 rounded-lg bg-brand-500 text-white hover:bg-brand-600 text-xs font-semibold shadow-sm inline-flex items-center gap-1"
+                          >
+                            <span>View Details</span>
+                            <ArrowUpRight className="w-3.5 h-3.5" />
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            <TablePagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              totalItems={filteredIssues.length}
+              pageSize={pageSize}
+              onPageChange={(page) => setCurrentPage(page)}
+              isLoading={isLoading}
+            />
+          </div>
+        )}
 
       </div>
 

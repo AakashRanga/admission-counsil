@@ -12,35 +12,35 @@ import schemas
 # Initial Seed Users for Different System Roles
 INITIAL_ROLE_USERS = [
     {
-        "name": "Priya Nambiar",
+        "name": "Student Affairs",
         "email": "council@simats.edu",
         "hashed_password": "council123",
         "role": "student_council",
         "department": "Student Affairs Desk"
     },
     {
-        "name": "Dr. K. S. Sundaram",
+        "name": "Academic",
         "email": "academic@simats.edu",
         "hashed_password": "academic123",
         "role": "ad_academic",
         "department": "Associate Dean Academic"
     },
     {
-        "name": "Er. Rajesh V.",
+        "name": "Maintenance",
         "email": "estate@simats.edu",
         "hashed_password": "estate123",
         "role": "ad_maintenance",
         "department": "Associate Dean Maintenance"
     },
     {
-        "name": "Dr. Ananya R.",
+        "name": "Associate Dean",
         "email": "welfare@simats.edu",
         "hashed_password": "welfare123",
         "role": "ad_students",
         "department": "Associate Dean Student Welfare"
     },
     {
-        "name": "Prof. M. Ramachandran",
+        "name": "Super Admin",
         "email": "admin@simats.edu",
         "hashed_password": "admin123",
         "role": "admin",
@@ -48,88 +48,53 @@ INITIAL_ROLE_USERS = [
     }
 ]
 
-INITIAL_GRIEVANCES = [
+INITIAL_GRIEVANCES = []
+
+INITIAL_DEPARTMENTS = [
+    {"id": "dept-1", "name": "Computer Science & Engineering", "code": "CSE", "head_name": "Dr. Aris Thorne"},
+    {"id": "dept-2", "name": "Electrical & Electronics Eng.", "code": "EEE", "head_name": "Dr. Elena Vance"},
+    {"id": "dept-3", "name": "Mechanical Engineering", "code": "MECH", "head_name": "Prof. Marcus Vance"},
+    {"id": "dept-4", "name": "Biotechnology & Bioengineering", "code": "BIO", "head_name": "Dr. Sophia Lin"},
+    {"id": "dept-5", "name": "School of Architecture & Design", "code": "ARCH", "head_name": "Prof. David Miller"},
+    {"id": "dept-6", "name": "School of Management & Business", "code": "SMB", "head_name": "Dr. Rachel Green"}
+]
+
+INITIAL_AUDIT_LOGS = [
     {
-        "id": "GRV-2026-101",
-        "type": "academic",
-        "title": "Semester 4 Data Structures Internal Marks Dispute",
-        "student_id": "2024CSE042",
-        "student_name": "Aakash Ranga",
-        "department": "Computer Science & Engineering",
-        "mobile": "+91 98765 43210",
-        "category": "Grade & Attendance Appeal",
-        "description": "Mismatch in internal assessment 2 marks recorded in portal vs corrected physical answer paper.",
-        "remarks": "Verified physical sheet with HOD.",
-        "status": "pending",
-        "subject": "Data Structures & Algorithms",
-        "faculty_name": "Dr. S. K. Raman",
-        "course": "B.Tech CSE"
+        "id": "log-101",
+        "action": "CREATE_COMPLAINT",
+        "performed_by": "Siddharth Rao (Student Council)",
+        "role": "student_council",
+        "target_id": "GRV-2026-101",
+        "timestamp": "2026-07-23 09:00:15",
+        "details": "Registered Academic Complaint for Mechanical Lab Timetable clash."
     },
     {
-        "id": "GRV-2026-102",
-        "type": "maintenance",
-        "title": "Block B 3rd Floor Lab Air Conditioner Leakage",
-        "student_id": "2024ECE118",
-        "student_name": "Kavitha S.",
-        "department": "Electrical & Electronics Engineering",
-        "mobile": "+91 98765 12345",
-        "category": "HVAC & Electrical Repair",
-        "description": "Water dripping over Server Rack 3 from AC unit #4 causing potential electrical hazard.",
-        "remarks": "Estate team dispatched.",
-        "status": "assigned",
-        "building": "Block B - Tech Center",
-        "floor": "3rd Floor",
-        "room_number": "Lab 304",
-        "location": "Near East Stairwell"
+        "id": "log-102",
+        "action": "ASSIGN_STAFF",
+        "performed_by": "Eng. Rajesh Verma (AD Maintenance)",
+        "role": "ad_maintenance",
+        "target_id": "GRV-2026-102",
+        "timestamp": "2026-07-22 13:30:00",
+        "details": "Assigned NetOps Team - Tech Alok to Wi-Fi issue in Library 2nd Floor."
     },
     {
-        "id": "GRV-2026-103",
-        "type": "academic",
-        "title": "Medical Attendance Exemption Appeal for Sports Tournament",
-        "student_id": "2024MEC089",
-        "student_name": "Rahul Varma",
-        "department": "Mechanical Engineering",
-        "mobile": "+91 98400 11223",
-        "category": "Attendance Duty Leave",
-        "description": "Attended Inter-University Football Tournament from July 10-15. Certificate attached for attendance credit.",
-        "remarks": "Pending Dean approval.",
-        "status": "investigating",
-        "subject": "Fluid Mechanics",
-        "faculty_name": "Prof. P. N. Rao",
-        "course": "B.Tech Mechanical"
+        "id": "log-103",
+        "action": "VERIFY_RESOLUTION",
+        "performed_by": "Prof. Ananya Roy (AD Students)",
+        "role": "ad_students",
+        "target_id": "GRV-2026-105",
+        "timestamp": "2026-07-22 17:10:00",
+        "details": "Verified repair with student feedback (5 stars) and closed grievance."
     },
     {
-        "id": "GRV-2026-104",
-        "type": "maintenance",
-        "title": "Main Library 2nd Floor WiFi Router Frequent Disconnection",
-        "student_id": "2024CIV055",
-        "student_name": "Deepa N.",
-        "department": "Civil Engineering",
-        "mobile": "+91 97100 99887",
-        "category": "Network & Wi-Fi",
-        "description": "Wi-Fi access point AP-LIB-02 dropping connection every 15 minutes during peak study hours.",
-        "remarks": "IT team investigating router logs.",
-        "status": "work_started",
-        "building": "Central Library",
-        "floor": "2nd Floor",
-        "room_number": "Digital Library Bay A",
-        "location": "Central Corridor"
-    },
-    {
-        "id": "GRV-2026-105",
-        "type": "academic",
-        "title": "Elective Allocation Change Request - AI vs Cybersecurity",
-        "student_id": "2024CSE190",
-        "student_name": "Sanjay Kumar",
-        "department": "Computer Science & Engineering",
-        "mobile": "+91 96000 55443",
-        "category": "Elective Allocation",
-        "description": "Allocated Open Elective 2 incorrectly due to portal glitch during registration window.",
-        "remarks": "Resolved and updated in ERP portal.",
-        "status": "resolved",
-        "subject": "Artificial Intelligence",
-        "faculty_name": "Dr. Meenakshi R.",
-        "course": "B.Tech CSE"
+        "id": "log-104",
+        "action": "UPDATE_STATUS",
+        "performed_by": "Dr. Ramesh Kumar (AD Academic)",
+        "role": "ad_academic",
+        "target_id": "GRV-2026-103",
+        "timestamp": "2026-07-22 18:45:00",
+        "details": "Marked grade dispute ticket under active investigation."
     }
 ]
 
@@ -137,7 +102,7 @@ from sqlalchemy import text
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Migrates tables every time app.py runs and seeds default role users and grievances into academic_council DB."""
+    """Migrates tables every time app.py runs and seeds default role users, grievances, departments, and audit logs into academic_council DB."""
     print("[*] Running table auto-migrations for database: academic_council")
     Base.metadata.create_all(bind=engine)
     
@@ -146,7 +111,12 @@ async def lifespan(app: FastAPI):
         for col_name, col_type in [
             ("assigned_staff_name", "VARCHAR(100) NULL"),
             ("assigned_staff_mobile", "VARCHAR(30) NULL"),
-            ("special_instructions", "TEXT NULL")
+            ("special_instructions", "TEXT NULL"),
+            ("rating", "INT NULL"),
+            ("satisfied", "TINYINT(1) NULL"),
+            ("feedback_comments", "TEXT NULL"),
+            ("final_remarks", "TEXT NULL"),
+            ("closed_at", "VARCHAR(100) NULL")
         ]:
             try:
                 conn.execute(text(f"ALTER TABLE grievances ADD COLUMN {col_name} {col_type}"))
@@ -169,9 +139,23 @@ async def lifespan(app: FastAPI):
                 grv_obj = models.Grievance(**seed_grv)
                 db.add(grv_obj)
             print("[*] Auto-seed complete: Initial grievance tickets inserted into MySQL Workbench academic_council database.")
+
+        # Seed departments if database table is empty
+        if db.query(models.Department).count() == 0:
+            for seed_dept in INITIAL_DEPARTMENTS:
+                dept_obj = models.Department(**seed_dept)
+                db.add(dept_obj)
+            print("[*] Auto-seed complete: Initial departments inserted into MySQL Workbench academic_council database.")
+
+        # Seed audit logs if database table is empty
+        if db.query(models.AuditLog).count() == 0:
+            for seed_log in INITIAL_AUDIT_LOGS:
+                log_obj = models.AuditLog(**seed_log)
+                db.add(log_obj)
+            print("[*] Auto-seed complete: Initial audit logs inserted into MySQL Workbench academic_council database.")
         
         db.commit()
-        print("[*] Auto-seed complete: Role users & grievances verified in database.")
+        print("[*] Auto-seed complete: Role users, grievances, departments & audit logs verified in database.")
     except Exception as e:
         print(f"[!] Error during database seeding: {e}")
         db.rollback()
@@ -249,6 +233,80 @@ def login(req: schemas.LoginRequest, db: Session = Depends(get_db)):
 def get_authority_users(db: Session = Depends(get_db)):
     return db.query(models.User).all()
 
+@app.post("/api/users", response_model=schemas.UserResponse)
+def create_authority_user(req: schemas.UserCreate, db: Session = Depends(get_db)):
+    existing = db.query(models.User).filter(models.User.email == req.email.strip()).first()
+    if existing:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"User with email '{req.email}' already exists."
+        )
+    user_obj = models.User(
+        name=req.name,
+        email=req.email.strip(),
+        hashed_password=req.password,
+        role=req.role,
+        department=req.department
+    )
+    db.add(user_obj)
+    db.commit()
+    db.refresh(user_obj)
+    return user_obj
+
+@app.get("/api/departments", response_model=List[schemas.DepartmentResponse])
+def get_departments(db: Session = Depends(get_db)):
+    return db.query(models.Department).all()
+
+@app.post("/api/departments", response_model=schemas.DepartmentResponse)
+def create_department(req: schemas.DepartmentCreate, db: Session = Depends(get_db)):
+    count = db.query(models.Department).count()
+    new_id = f"dept-{count + 1}"
+    dept_obj = models.Department(
+        id=new_id,
+        name=req.name,
+        code=req.code.upper(),
+        head_name=req.head_name
+    )
+    db.add(dept_obj)
+    db.commit()
+    db.refresh(dept_obj)
+    return dept_obj
+
+@app.get("/api/audit-logs", response_model=List[schemas.AuditLogResponse])
+def get_audit_logs(db: Session = Depends(get_db)):
+    return db.query(models.AuditLog).order_by(models.AuditLog.created_at.desc()).all()
+
+@app.post("/api/audit-logs", response_model=schemas.AuditLogResponse)
+def create_audit_log(req: schemas.AuditLogCreate, db: Session = Depends(get_db)):
+    count = db.query(models.AuditLog).count()
+    new_id = f"log-{100 + count + 1}"
+    log_obj = models.AuditLog(
+        id=new_id,
+        action=req.action,
+        performed_by=req.performed_by,
+        role=req.role,
+        target_id=req.target_id,
+        timestamp=req.timestamp,
+        details=req.details
+    )
+    db.add(log_obj)
+    db.commit()
+    db.refresh(log_obj)
+    return log_obj
+
+def get_next_grievance_id(db: Session) -> str:
+    all_ids = db.query(models.Grievance.id).all()
+    max_num = 100
+    for (g_id,) in all_ids:
+        if g_id and g_id.startswith("GRV-2026-"):
+            try:
+                num = int(g_id.split("-")[-1])
+                if num > max_num:
+                    max_num = num
+            except ValueError:
+                pass
+    return f"GRV-2026-{max_num + 1}"
+
 @app.get("/api/issues", response_model=List[schemas.GrievanceResponse])
 def get_grievances(db: Session = Depends(get_db)):
     return db.query(models.Grievance).all()
@@ -256,8 +314,7 @@ def get_grievances(db: Session = Depends(get_db)):
 @app.post("/api/issues", response_model=schemas.GrievanceResponse)
 @app.post("/api/issues/single", response_model=schemas.GrievanceResponse)
 def create_single_grievance(item: schemas.GrievanceCreate, db: Session = Depends(get_db)):
-    current_count = db.query(models.Grievance).count()
-    new_id = f"GRV-2026-{100 + current_count + 1}"
+    new_id = get_next_grievance_id(db)
     db_item = models.Grievance(id=new_id, **item.model_dump())
     db.add(db_item)
     db.commit()
@@ -266,13 +323,13 @@ def create_single_grievance(item: schemas.GrievanceCreate, db: Session = Depends
 
 @app.post("/api/issues/bulk", response_model=schemas.BulkGrievanceResponse)
 def create_bulk_grievances(payload: schemas.BulkGrievanceCreate, db: Session = Depends(get_db)):
-    current_count = db.query(models.Grievance).count()
     created_items = []
     
-    for idx, item in enumerate(payload.items, start=1):
-        new_id = f"GRV-2026-{100 + current_count + idx}"
+    for item in payload.items:
+        new_id = get_next_grievance_id(db)
         db_item = models.Grievance(id=new_id, **item.model_dump())
         db.add(db_item)
+        db.flush()
         created_items.append(db_item)
     
     db.commit()
@@ -319,6 +376,35 @@ def update_grievance_status(issue_id: str, payload: schemas.UpdateStatusRequest,
             grv.remarks = f"{grv.remarks} | {payload.remarks}"
         else:
             grv.remarks = payload.remarks
+
+    db.commit()
+    db.refresh(grv)
+    return grv
+
+
+@app.put("/api/issues/{issue_id}/verify", response_model=schemas.GrievanceResponse)
+def verify_grievance_resolution(issue_id: str, payload: schemas.VerifyResolutionRequest, db: Session = Depends(get_db)):
+    grv = db.query(models.Grievance).filter(models.Grievance.id == issue_id).first()
+    if not grv:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Grievance with ID '{issue_id}' not found."
+        )
+
+    grv.status = payload.status
+    if payload.rating is not None:
+        grv.rating = payload.rating
+    if payload.satisfied is not None:
+        grv.satisfied = payload.satisfied
+    if payload.feedback_comments is not None:
+        grv.feedback_comments = payload.feedback_comments
+    if payload.final_remarks is not None:
+        grv.final_remarks = payload.final_remarks
+
+    if payload.status == "resolved":
+        grv.closed_at = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    elif payload.status == "reopened":
+        grv.closed_at = None
 
     db.commit()
     db.refresh(grv)

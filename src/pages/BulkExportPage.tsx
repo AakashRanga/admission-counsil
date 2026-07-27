@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { Download, Upload, FileSpreadsheet, CheckCircle2, BookOpen, Wrench, FileText } from 'lucide-react';
+import { parseCSVLines } from '../utils/csvParser';
+import { apiService } from '../services/api';
 
 export const BulkExportPage: React.FC = () => {
-  const { issues, addIssue, addToast } = useApp();
+  const { issues, refreshIssuesFromDB, addToast } = useApp();
   const [importStatus, setImportStatus] = useState<string | null>(null);
 
   // CSV Templates Generator
@@ -60,38 +62,111 @@ export const BulkExportPage: React.FC = () => {
       const file = e.target.files[0];
       const reader = new FileReader();
 
-      reader.onload = (evt) => {
+      reader.onload = async (evt) => {
         const text = evt.target?.result as string;
         if (!text) return;
 
-        const lines = text.split('\n').filter(line => line.trim() !== '');
-        if (lines.length <= 1) {
-          setImportStatus('CSV file has no data rows.');
+        const parsedRows = parseCSVLines(text);
+        if (parsedRows.length <= 1) {
+          setImportStatus('CSV file contains no data rows.');
           return;
         }
 
-        // Process rows after header
-        let importedCount = 0;
-        for (let i = 1; i < lines.length; i++) {
-          const cols = lines[i].split(',');
-          if (cols.length >= 4) {
-            addIssue({
-              type: cols[1]?.toLowerCase().includes('maint') ? 'maintenance' : 'academic',
-              student: {
-                id: cols[0] || `2024STU${100 + i}`,
-                name: cols[1] || `Bulk Student ${i}`,
-                department: cols[2] || 'Computer Science & Engineering',
-                mobile: cols[3] || '+91 98000 00000'
-              },
-              description: cols[cols.length - 1] || 'Bulk imported grievance complaint.',
-              remarks: 'Imported via CSV Bulk Uploader'
-            });
-            importedCount++;
+        const headerCols = parsedRows[0].map(c => c.toLowerCase().trim());
+        const isMaintenance = headerCols.some(c => c.includes('building') || c.includes('room') || c.includes('landmark'));
+
+        const findIdx = (keywords: string[]) => {
+          for (const kw of keywords) {
+            const idx = headerCols.findIndex(h => h.includes(kw));
+            if (idx !== -1) return idx;
+          }
+          return -1;
+        };
+
+        const studentIdIdx = findIdx(['student id', 'roll', 'student_id', 'id']);
+        const nameIdx = findIdx(['student name', 'candidate name', 'student_name', 'name']);
+        const deptIdx = findIdx(['department', 'dept', 'branch']);
+        const mobileIdx = findIdx(['mobile', 'phone', 'contact']);
+        const categoryIdx = findIdx(['academic category', 'maintenance category', 'category', 'type']);
+        const descIdx = findIdx(['description', 'details', 'complaint', 'issue']);
+        const remarksIdx = findIdx(['remarks', 'comment', 'notes']);
+
+        // Academic specific
+        const subjectIdx = findIdx(['subject', 'course code']);
+        const facultyIdx = findIdx(['faculty name', 'faculty', 'teacher', 'evaluator', 'professor']);
+        const courseIdx = findIdx(['course', 'degree', 'program']);
+
+        // Maintenance specific
+        const buildingIdx = findIdx(['building block', 'building', 'block']);
+        const floorIdx = findIdx(['floor']);
+        const roomIdx = findIdx(['room number', 'room']);
+        const locationIdx = findIdx(['landmark location', 'location', 'landmark']);
+
+        const itemsToUpload: any[] = [];
+        for (let i = 1; i < parsedRows.length; i++) {
+          const cols = parsedRows[i];
+          if (cols.length >= 3 && cols[0].trim()) {
+            const studentId = (studentIdIdx !== -1 && cols[studentIdIdx]) ? cols[studentIdIdx].trim() : (cols[0] || `2024STU${100 + i}`);
+            const studentName = (nameIdx !== -1 && cols[nameIdx]) ? cols[nameIdx].trim() : (cols[1] || `Student ${i}`);
+            const dept = (deptIdx !== -1 && cols[deptIdx]) ? cols[deptIdx].trim() : (cols[2] || 'Computer Science & Engineering');
+            const mobile = (mobileIdx !== -1 && cols[mobileIdx]) ? cols[mobileIdx].trim() : (cols[3] || '+91 98000 00000');
+            const category = (categoryIdx !== -1 && cols[categoryIdx]) ? cols[categoryIdx].trim() : (isMaintenance ? 'General Maintenance' : 'Academic Grievance');
+            const description = (descIdx !== -1 && cols[descIdx]) ? cols[descIdx].trim() : (cols[cols.length - 1] || 'Bulk imported complaint.');
+            const remarks = (remarksIdx !== -1 && cols[remarksIdx]) ? cols[remarksIdx].trim() : 'Imported via CSV Uploader';
+
+            if (isMaintenance) {
+              const building = (buildingIdx !== -1 && cols[buildingIdx]) ? cols[buildingIdx].trim() : (cols[4] || 'Main Block');
+              const floor = (floorIdx !== -1 && cols[floorIdx]) ? cols[floorIdx].trim() : (cols[5] || '1st Floor');
+              const roomNumber = (roomIdx !== -1 && cols[roomIdx]) ? cols[roomIdx].trim() : (cols[6] || 'General');
+              const location = (locationIdx !== -1 && cols[locationIdx]) ? cols[locationIdx].trim() : (cols[8] || 'Campus');
+
+              itemsToUpload.push({
+                type: 'maintenance',
+                title: `${category}: ${building} (${roomNumber})`,
+                student_id: studentId,
+                student_name: studentName,
+                department: dept,
+                mobile,
+                building,
+                floor,
+                room_number: roomNumber,
+                category,
+                location,
+                description,
+                remarks
+              });
+            } else {
+              const subject = (subjectIdx !== -1 && cols[subjectIdx]) ? cols[subjectIdx].trim() : (cols[4] || 'General Subject');
+              const facultyName = (facultyIdx !== -1 && cols[facultyIdx]) ? cols[facultyIdx].trim() : (cols[5] || 'Unassigned');
+              const course = (courseIdx !== -1 && cols[courseIdx]) ? cols[courseIdx].trim() : (cols[6] || 'Degree');
+
+              itemsToUpload.push({
+                type: 'academic',
+                title: `${category}: ${subject}`,
+                student_id: studentId,
+                student_name: studentName,
+                department: dept,
+                mobile,
+                subject,
+                faculty_name: facultyName,
+                course,
+                category,
+                description,
+                remarks
+              });
+            }
           }
         }
 
-        setImportStatus(`Successfully imported ${importedCount} grievances into the portal!`);
-        addToast('success', 'Bulk Import Successful', `Processed ${importedCount} complaints from ${file.name}`);
+        if (itemsToUpload.length > 0) {
+          const res = await apiService.createBulkIssues(itemsToUpload);
+          await refreshIssuesFromDB();
+          const count = res?.count || itemsToUpload.length;
+          setImportStatus(`Successfully batch imported ${count} grievances into the MySQL database!`);
+          addToast('success', 'Bulk Import Successful', `Processed ${count} complaints from ${file.name}`);
+        } else {
+          setImportStatus('No valid data rows found in CSV.');
+        }
       };
 
       reader.readAsText(file);

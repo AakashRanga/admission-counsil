@@ -50,6 +50,11 @@ class GrievanceBase(BaseModel):
     assigned_staff_name: Optional[str] = None
     assigned_staff_mobile: Optional[str] = None
     special_instructions: Optional[str] = None
+    rating: Optional[int] = None
+    satisfied: Optional[bool] = None
+    feedback_comments: Optional[str] = None
+    final_remarks: Optional[str] = None
+    closed_at: Optional[str] = None
 
 class AssignStaffRequest(BaseModel):
     assigned_staff_name: str
@@ -59,6 +64,13 @@ class AssignStaffRequest(BaseModel):
 class UpdateStatusRequest(BaseModel):
     status: str
     remarks: Optional[str] = None
+
+class VerifyResolutionRequest(BaseModel):
+    status: str
+    rating: Optional[int] = None
+    satisfied: Optional[bool] = None
+    feedback_comments: Optional[str] = None
+    final_remarks: Optional[str] = None
 
 
 class GrievanceCreate(GrievanceBase):
@@ -79,5 +91,41 @@ class BulkGrievanceResponse(BaseModel):
     status: str
     count: int
     items: List[GrievanceResponse]
+
+
+class DepartmentBase(BaseModel):
+    name: str
+    code: str
+    head_name: str
+
+class DepartmentCreate(DepartmentBase):
+    pass
+
+class DepartmentResponse(DepartmentBase):
+    id: str
+    created_at: datetime.datetime
+
+    class Config:
+        from_attributes = True
+
+
+class AuditLogBase(BaseModel):
+    action: str
+    performed_by: str
+    role: str
+    target_id: Optional[str] = None
+    timestamp: str
+    details: str
+
+class AuditLogCreate(AuditLogBase):
+    pass
+
+class AuditLogResponse(AuditLogBase):
+    id: str
+    created_at: datetime.datetime
+
+    class Config:
+        from_attributes = True
+
 
 

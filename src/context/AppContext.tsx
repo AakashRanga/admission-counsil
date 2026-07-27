@@ -36,6 +36,7 @@ interface AppContextType {
   auditLogs: AuditLogEntry[];
   notifications: NotificationItem[];
   isDarkMode: boolean;
+  isLoading: boolean;
   toggleDarkMode: () => void;
   searchQuery: string;
   setSearchQuery: (query: string) => void;
@@ -46,7 +47,10 @@ interface AppContextType {
 
   // Actions
   refreshIssuesFromDB: () => Promise<void>;
+  refreshAdminDataFromDB: () => Promise<void>;
   addIssue: (issueData: Partial<GrievanceIssue>) => GrievanceIssue;
+  addUser: (userData: { name: string; email: string; role: string; department: string; password?: string }) => Promise<void>;
+  addDepartment: (deptData: { name: string; code: string; headName: string }) => Promise<void>;
   updateIssueStatus: (issueId: string, status: IssueStatus, comment?: string) => void;
   assignStaffToIssue: (issueId: string, staff: AssignedStaff) => void;
   addStudentFeedback: (issueId: string, feedback: StudentFeedback, closeOrReopen: 'close' | 'reopen', finalRemarks?: string) => void;
@@ -86,10 +90,11 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     const saved = localStorage.getItem('ac_issues');
     return saved ? JSON.parse(saved) : MOCK_ISSUES;
   });
-  const [departments] = useState<DepartmentInfo[]>(INITIAL_DEPARTMENTS);
-  const [users] = useState<SystemUser[]>(INITIAL_USERS);
+  const [departments, setDepartments] = useState<DepartmentInfo[]>(INITIAL_DEPARTMENTS);
+  const [users, setUsers] = useState<SystemUser[]>(INITIAL_USERS);
   const [auditLogs, setAuditLogs] = useState<AuditLogEntry[]>(INITIAL_AUDIT_LOGS);
   const [notifications, setNotifications] = useState<NotificationItem[]>(INITIAL_NOTIFICATIONS);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
     return localStorage.getItem('ac_theme') === 'dark';
   });
@@ -99,9 +104,11 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   // Function to fetch database records from MySQL via FastAPI REST API
   const refreshIssuesFromDB = async () => {
-    const dbData = await apiService.getIssues();
-    if (dbData && Array.isArray(dbData) && dbData.length > 0) {
-      const mappedDBIssues: GrievanceIssue[] = dbData.map((dbItem: any) => {
+    setIsLoading(true);
+    try {
+      const dbData = await apiService.getIssues();
+      if (dbData && Array.isArray(dbData) && dbData.length > 0) {
+        const mappedDBIssues: GrievanceIssue[] = dbData.map((dbItem: any) => {
         const currentStatus = dbItem.status || 'pending';
         const assignedTo = dbItem.assigned_staff_name ? {
           name: dbItem.assigned_staff_name,
@@ -219,6 +226,14 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
           facultyName: dbItem.faculty_name,
           course: dbItem.course,
           assignedTo,
+          feedback: (dbItem.rating !== null && dbItem.rating !== undefined) ? {
+            satisfied: Boolean(dbItem.satisfied),
+            rating: Number(dbItem.rating),
+            comments: dbItem.feedback_comments || '',
+            submittedAt: dbItem.closed_at || 'Recently'
+          } : undefined,
+          finalRemarks: dbItem.final_remarks || undefined,
+          closedAt: dbItem.closed_at || undefined,
           timeline: timelineEntries
         };
       });
@@ -226,13 +241,68 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       // Replace issues state with live database records from MySQL academic_council
       setIssues(mappedDBIssues);
     }
+    } catch (err) {
+      console.warn('[*] Error refreshing issues from DB:', err);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
+  // Function to fetch Admin DB records (users, departments, audit logs)
+  const refreshAdminDataFromDB = async () => {
+    setIsLoading(true);
+    try {
+      const [usersData, deptsData, logsData] = await Promise.all([
+        apiService.getUsers(),
+        apiService.getDepartments(),
+        apiService.getAuditLogs()
+      ]);
 
+      if (usersData && Array.isArray(usersData) && usersData.length > 0) {
+        const mappedUsers: SystemUser[] = usersData.map((u: any) => ({
+          id: String(u.id),
+          name: u.name,
+          email: u.email,
+          role: u.role,
+          department: u.department
+        }));
+        setUsers(mappedUsers);
+      }
 
-  // Fetch DB issues on initial mount
+      if (deptsData && Array.isArray(deptsData) && deptsData.length > 0) {
+        const mappedDepts: DepartmentInfo[] = deptsData.map((d: any) => ({
+          id: d.id,
+          name: d.name,
+          code: d.code,
+          headName: d.head_name || d.headName,
+          activeIssuesCount: 0
+        }));
+        setDepartments(mappedDepts);
+      }
+
+      if (logsData && Array.isArray(logsData) && logsData.length > 0) {
+        const mappedLogs: AuditLogEntry[] = logsData.map((l: any) => ({
+          id: String(l.id),
+          action: l.action,
+          performedBy: l.performed_by || l.performedBy,
+          role: l.role,
+          targetId: l.target_id || l.targetId,
+          timestamp: l.timestamp,
+          details: l.details
+        }));
+        setAuditLogs(mappedLogs);
+      }
+    } catch (e) {
+      console.warn('[*] Error fetching admin data from DB:', e);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Fetch DB issues & admin data on initial mount
   useEffect(() => {
     refreshIssuesFromDB();
+    refreshAdminDataFromDB();
   }, []);
 
   // Dark Mode Sync
@@ -273,16 +343,72 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       ad_students: 'AD Students',
       admin: 'Administrator'
     };
+    const nowStr = new Date().toLocaleString();
     const newLog: AuditLogEntry = {
       id: 'log-' + Date.now(),
       action,
-      performedBy: `${roleTitles[currentRole]}`,
+      performedBy: `${roleTitles[currentRole] || 'System User'}`,
       role: currentRole,
       targetId,
-      timestamp: new Date().toLocaleString(),
+      timestamp: nowStr,
       details
     };
+
+    // Save audit log to DB
+    apiService.createAuditLog({
+      action: newLog.action,
+      performed_by: newLog.performedBy,
+      role: newLog.role,
+      target_id: newLog.targetId,
+      timestamp: newLog.timestamp,
+      details: newLog.details
+    });
+
     setAuditLogs(prev => [newLog, ...prev]);
+  };
+
+  const addUser = async (userData: { name: string; email: string; role: string; department: string; password?: string }) => {
+    const newUserObj = await apiService.createUser({
+      name: userData.name,
+      email: userData.email,
+      role: userData.role,
+      department: userData.department,
+      password: userData.password || 'simats123'
+    });
+
+    if (newUserObj) {
+      const createdUser: SystemUser = {
+        id: String(newUserObj.id),
+        name: newUserObj.name,
+        email: newUserObj.email,
+        role: newUserObj.role,
+        department: newUserObj.department
+      };
+      setUsers(prev => [createdUser, ...prev]);
+      addAuditLog('CREATE_USER', String(newUserObj.id), `Added authority user ${userData.name} (${userData.role}) to DB.`);
+      addToast('success', 'User Registered', `${userData.name} added to authority roster.`);
+    }
+  };
+
+  const addDepartment = async (deptData: { name: string; code: string; headName: string }) => {
+    const newDeptObj = await apiService.createDepartment({
+      name: deptData.name,
+      code: deptData.code,
+      head_name: deptData.headName
+    });
+
+    if (newDeptObj) {
+      const createdDept: DepartmentInfo = {
+        id: newDeptObj.id,
+        name: newDeptObj.name,
+        code: newDeptObj.code,
+        headName: newDeptObj.head_name || newDeptObj.headName,
+        activeIssuesCount: 0
+      };
+      setDepartments(prev => [...prev, createdDept]);
+      addAuditLog('CREATE_DEPARTMENT', newDeptObj.id, `Created new department ${deptData.name} (${deptData.code}).`);
+      addToast('success', 'Department Created', `${deptData.name} directory record saved to DB.`);
+    }
   };
 
   const addIssue = (issueData: Partial<GrievanceIssue>): GrievanceIssue => {
@@ -448,10 +574,17 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     closeOrReopen: 'close' | 'reopen',
     finalRemarks?: string
   ) => {
+    const nowStr = new Date().toLocaleString([], { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
     const targetStatus: IssueStatus = closeOrReopen === 'close' ? 'resolved' : 'reopened';
 
-    // Persist final closure status to database API
-    apiService.updateStatus(issueId, targetStatus, finalRemarks || feedback.comments);
+    // Persist final closure or reopening status & feedback to backend MySQL database API
+    apiService.verifyResolution(issueId, {
+      status: targetStatus,
+      rating: feedback.rating,
+      satisfied: feedback.satisfied,
+      feedback_comments: feedback.comments,
+      final_remarks: finalRemarks
+    });
 
     setIssues(prev => prev.map(issue => {
 
@@ -499,6 +632,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       auditLogs,
       notifications,
       isDarkMode,
+      isLoading,
       toggleDarkMode,
       searchQuery,
       setSearchQuery,
@@ -507,7 +641,10 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       activeTab,
       setActiveTab,
       refreshIssuesFromDB,
+      refreshAdminDataFromDB,
       addIssue,
+      addUser,
+      addDepartment,
       updateIssueStatus,
       assignStaffToIssue,
       addStudentFeedback,

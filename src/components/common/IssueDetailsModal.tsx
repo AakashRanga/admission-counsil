@@ -205,7 +205,7 @@ export const IssueDetailsModal: React.FC<IssueDetailsModalProps> = ({
                     )}
                   </div>
 
-                  {onOpenAssignModal && (
+                  {(currentRole === 'ad_academic' || currentRole === 'ad_maintenance') && onOpenAssignModal && (
                     <button
                       onClick={() => {
                         onClose();
@@ -219,56 +219,62 @@ export const IssueDetailsModal: React.FC<IssueDetailsModalProps> = ({
                 </div>
               )}
 
-              {/* Action Bar based on Role (Only for Authorities) */}
-              {currentRole !== 'student_council' && (
+              {/* Action Bar based on Role (Only for Operational Decks) */}
+              {currentRole !== 'student_council' && currentRole !== 'admin' && (
                 <div className="p-4 rounded-xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 space-y-3">
                   <h4 className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300">
                     Update Status & Add Log Entry
                   </h4>
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      placeholder="Optional log comment for status change..."
-                      value={commentInput}
-                      onChange={(e) => setCommentInput(e.target.value)}
-                      className="flex-1 px-3 py-1.5 text-xs rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 outline-none"
-                    />
-                  </div>
+                  {currentRole !== 'ad_students' && (
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        placeholder="Optional log comment for status change..."
+                        value={commentInput}
+                        onChange={(e) => setCommentInput(e.target.value)}
+                        className="flex-1 px-3 py-1.5 text-xs rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 outline-none"
+                      />
+                    </div>
+                  )}
 
                   <div className="flex flex-wrap gap-2">
-                    <button
-                      onClick={() => handleStatusChange('investigating')}
-                      className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-500 text-white hover:bg-blue-600"
-                    >
-                      Set Investigating
-                    </button>
+                    {currentRole === 'ad_students' ? (
+                      onOpenResolutionModal && (
+                        <button
+                          onClick={() => {
+                            onClose();
+                            onOpenResolutionModal(issue);
+                          }}
+                          className="px-4 py-2 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-md shadow-emerald-500/20 inline-flex items-center gap-2"
+                        >
+                          <UserCheck className="w-4 h-4" />
+                          <span>Verify & Close Ticket</span>
+                        </button>
+                      )
+                    ) : (
+                      <>
+                        <button
+                          onClick={() => handleStatusChange('investigating')}
+                          className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-500 text-white hover:bg-blue-600"
+                        >
+                          Set Investigating
+                        </button>
 
-                    <button
-                      onClick={() => handleStatusChange('work_started')}
-                      className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-brand-600 text-white hover:bg-brand-700"
-                    >
-                      Work Started
-                    </button>
+                        <button
+                          onClick={() => handleStatusChange('work_started')}
+                          className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-brand-600 text-white hover:bg-brand-700"
+                        >
+                          Work Started
+                        </button>
 
-                    <button
-                      onClick={() => handleStatusChange('work_completed')}
-                      className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-teal-600 text-white hover:bg-teal-700"
-                    >
-                      Work Completed
-                    </button>
-
-                    {currentRole === 'ad_students' && onOpenResolutionModal && (
-                      <button
-                        onClick={() => {
-                          onClose();
-                          onOpenResolutionModal(issue);
-                        }}
-                        className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-700 shadow-md shadow-emerald-500/20"
-                      >
-                        Verify & Close
-                      </button>
+                        <button
+                          onClick={() => handleStatusChange('work_completed')}
+                          className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-teal-600 text-white hover:bg-teal-700"
+                        >
+                          Work Completed
+                        </button>
+                      </>
                     )}
-
                   </div>
                 </div>
               )}

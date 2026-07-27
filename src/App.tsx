@@ -68,7 +68,14 @@ const MainLayout: React.FC = () => {
 
   const renderActiveView = () => {
     // 1. Common Tab Pages
-    if (activeTab === 'bulk_export') return <BulkExportPage />;
+    if (activeTab === 'bulk_export') {
+      if (currentRole === 'ad_academic' || currentRole === 'ad_maintenance') {
+        return currentRole === 'ad_academic' ? 
+          <ADAcademicDashboard onOpenAssignModal={(issue) => setAssignTargetIssue(issue)} /> : 
+          <ADMaintenanceDashboard onOpenAssignModal={(issue) => setAssignTargetIssue(issue)} />;
+      }
+      return <BulkExportPage />;
+    }
     if (activeTab === 'notifications') return <NotificationsPage />;
     if (activeTab === 'reports') return <ReportsPage />;
     if (activeTab === 'users') return <UsersManagementPage />;

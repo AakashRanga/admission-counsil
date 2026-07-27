@@ -67,13 +67,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
     ad_academic: [
       { id: 'dashboard', label: 'Academic Overview', icon: LayoutDashboard },
       { id: 'academic_queue', label: 'Academic Issues Queue', icon: BookOpen, badge: academicCount },
-      { id: 'bulk_export', label: 'Bulk Issue Export & Import', icon: Download },
       { id: 'reports', label: 'Academic Reports', icon: FileSpreadsheet }
     ],
     ad_maintenance: [
-      { id: 'dashboard', label: 'Estate Overview', icon: LayoutDashboard },
-      { id: 'maintenance_queue', label: 'Estate Repairs Queue', icon: Wrench, badge: maintenanceCount },
-      { id: 'bulk_export', label: 'Bulk Issue Export & Import', icon: Download },
+      { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+      { id: 'maintenance_queue', label: ' Repairs Queue', icon: Wrench, badge: maintenanceCount },
       { id: 'reports', label: 'Maintenance Logs', icon: FileSpreadsheet }
     ],
     ad_students: [
@@ -182,7 +180,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           className="w-full flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-bold bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-800 hover:bg-rose-100 dark:hover:bg-rose-900/60 transition-colors"
         >
           <LogOut className="w-4 h-4" />
-          <span>Switch Account / Logout</span>
+          <span>Logout</span>
         </button>
 
         <div className="text-[10px] text-slate-400 text-center">

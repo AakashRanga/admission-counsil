@@ -322,7 +322,7 @@ export const RegisterComplaintModal: React.FC<ModalProps> = ({ isOpen, onClose }
               <div className="flex items-center gap-2 border-b border-amber-200 dark:border-amber-800 pb-2">
                 <Building className="w-4 h-4 text-amber-600" />
                 <h3 className="text-xs font-bold uppercase tracking-wider text-amber-800 dark:text-amber-300">
-                  Maintenance & Estate Details
+                  Maintenance Details
                 </h3>
               </div>
 

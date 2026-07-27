@@ -72,7 +72,7 @@ export const ADStudentsDashboard: React.FC<ADStudentsDashboardProps> = ({ onOpen
         <div className="p-4 rounded-2xl glass-card border border-slate-200 dark:border-slate-800">
           <span className="text-[10px] font-bold uppercase tracking-wider text-amber-500">Maintenance</span>
           <h3 className="text-2xl font-extrabold text-amber-600 dark:text-amber-400 mt-1">{maintenanceCount}</h3>
-          <span className="text-[10px] text-slate-400 block mt-0.5">Campus estate repairs</span>
+          <span className="text-[10px] text-slate-400 block mt-0.5">Campus repairs</span>
         </div>
 
         <div className="p-4 rounded-2xl glass-card border border-slate-200 dark:border-slate-800">
@@ -232,11 +232,16 @@ export const ADStudentsDashboard: React.FC<ADStudentsDashboardProps> = ({ onOpen
                   <th className="py-3 px-3">Closed Date</th>
                   <th className="py-3 px-3">Rating</th>
                   <th className="py-3 px-3">Status</th>
+                  <th className="py-3 px-3 text-right">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                 {closedHistory.map((issue: GrievanceIssue) => (
-                  <tr key={issue.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/40">
+                  <tr 
+                    key={issue.id} 
+                    onClick={() => setSelectedIssueId(issue.id)}
+                    className="hover:bg-slate-50 dark:hover:bg-slate-800/40 cursor-pointer transition-colors"
+                  >
                     <td className="py-3 px-3 font-mono font-bold text-purple-600 dark:text-purple-400">{issue.id}</td>
                     <td className="py-3 px-3 font-semibold text-slate-800 dark:text-slate-200">{issue.student.name}</td>
                     <td className="py-3 px-3 text-slate-600 dark:text-slate-300">{issue.academicCategory || issue.maintenanceCategory}</td>
@@ -246,6 +251,17 @@ export const ADStudentsDashboard: React.FC<ADStudentsDashboardProps> = ({ onOpen
                     </td>
                     <td className="py-3 px-3">
                       <StatusBadge status={issue.status} />
+                    </td>
+                    <td className="py-3 px-3 text-right">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedIssueId(issue.id);
+                        }}
+                        className="px-2.5 py-1 rounded-lg bg-purple-600 hover:bg-purple-700 text-white text-xs font-semibold shadow-sm inline-flex items-center gap-1"
+                      >
+                        <span>View Details</span>
+                      </button>
                     </td>
                   </tr>
                 ))}
