@@ -171,10 +171,22 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# Enable CORS for Frontend Development
+# Enable CORS for Frontend & Server IP
+allowed_origins = [
+    "http://180.235.121.253:8190",
+    "http://180.235.121.253:8189",
+    "http://180.235.121.253",
+    "http://localhost:8190",
+    "http://localhost:8189",
+    "http://localhost:5173",
+    "http://127.0.0.1:8190",
+    "http://127.0.0.1:8189",
+    "*"
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -465,5 +477,7 @@ def verify_grievance_resolution(issue_id: str, payload: schemas.VerifyResolution
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("app:app", host="0.0.0.0", port=8000, reload=True)
+    import os
+    port = int(os.environ.get("PORT", 8189))
+    uvicorn.run("app:app", host="0.0.0.0", port=port, reload=True)
 

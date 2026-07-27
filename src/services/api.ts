@@ -1,4 +1,12 @@
-const API_BASE = 'http://localhost:8000/api';
+const getApiBase = () => {
+  if (typeof window !== 'undefined' && window.location) {
+    const hostname = window.location.hostname || '180.235.121.253';
+    return `http://${hostname}:8189/api`;
+  }
+  return 'http://180.235.121.253:8189/api';
+};
+
+const API_BASE = getApiBase();
 
 export interface LoginPayload {
   email: string;
