@@ -6,14 +6,6 @@ const getApiBase = () => {
   return 'http://180.235.121.253:8189/api';
 };
 
-const getFallbackApiBase = () => {
-  if (typeof window !== 'undefined' && window.location) {
-    const hostname = window.location.hostname || '180.235.121.253';
-    return `http://${hostname}:8000/api`;
-  }
-  return 'http://180.235.121.253:8000/api';
-};
-
 let activeApiBase = getApiBase();
 
 async function autoFetch(path: string, options?: RequestInit): Promise<Response> {
@@ -21,14 +13,7 @@ async function autoFetch(path: string, options?: RequestInit): Promise<Response>
     const res = await fetch(`${activeApiBase}${path}`, options);
     return res;
   } catch (err) {
-    const altBase = activeApiBase.includes(':8189') ? getFallbackApiBase() : getApiBase();
-    try {
-      const altRes = await fetch(`${altBase}${path}`, options);
-      activeApiBase = altBase; // Switch active base to working port
-      return altRes;
-    } catch (altErr) {
-      throw new Error(`Backend server is offline or unreachable (${activeApiBase}). Please make sure backend is running.`);
-    }
+    throw new Error(`Backend server is offline or unreachable (${activeApiBase}). Please make sure backend server is running on port 8189.`);
   }
 }
 

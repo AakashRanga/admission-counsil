@@ -7,9 +7,9 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# Read individual MySQL environment variables
+# Read individual MySQL environment variables from .env
 MYSQL_USER = os.getenv("MYSQL_USER", "root")
-MYSQL_PASSWORD = os.getenv("MYSQL_PASSWORD", "Simats@123")
+MYSQL_PASSWORD = os.getenv("MYSQL_PASSWORD", "12345")
 MYSQL_HOST = os.getenv("MYSQL_HOST", "localhost")
 MYSQL_PORT = os.getenv("MYSQL_PORT", "3306")
 MYSQL_DB = os.getenv("MYSQL_DB", "academic_council")
@@ -17,15 +17,11 @@ MYSQL_DB = os.getenv("MYSQL_DB", "academic_council")
 # URL-encode password to safely handle special characters like @, :, #, etc.
 encoded_password = urllib.parse.quote_plus(MYSQL_PASSWORD)
 
-# Default Connection URL
+# Construct connection URL dynamically from environment variables
 DEFAULT_URL = f"mysql+pymysql://{MYSQL_USER}:{encoded_password}@{MYSQL_HOST}:{MYSQL_PORT}/{MYSQL_DB}"
 
-# Configurable via DATABASE_URL or component variables
-RAW_DATABASE_URL = os.getenv("DATABASE_URL")
-if RAW_DATABASE_URL and RAW_DATABASE_URL != "mysql+pymysql://root:12345@localhost:3308/academic_council":
-    MYSQL_URL = RAW_DATABASE_URL
-else:
-    MYSQL_URL = DEFAULT_URL
+# Use DATABASE_URL if explicitly set in .env, otherwise default to component parameters
+MYSQL_URL = os.getenv("DATABASE_URL", DEFAULT_URL)
 
 # Attempt connection to MySQL; fallback to SQLite if MySQL service is not running locally
 try:
@@ -39,13 +35,14 @@ try:
         pass
     print(f"[*] Successfully connected to MySQL database engine.")
 except Exception as e:
-    # Try alternate port 3308 fallback if 3306 fails
+    # Attempt automatic failover port check (3308 vs 3306)
+    alt_port = "3308" if MYSQL_PORT == "3306" else "3306"
     try:
-        ALT_URL = f"mysql+pymysql://{MYSQL_USER}:{encoded_password}@{MYSQL_HOST}:3308/{MYSQL_DB}"
+        ALT_URL = f"mysql+pymysql://{MYSQL_USER}:{encoded_password}@{MYSQL_HOST}:{alt_port}/{MYSQL_DB}"
         engine = create_engine(ALT_URL, pool_pre_ping=True, pool_recycle=3600)
         with engine.connect() as conn:
             pass
-        print(f"[*] Successfully connected to MySQL database engine (Port 3308).")
+        print(f"[*] Successfully connected to MySQL database engine on port {alt_port}.")
     except Exception as alt_err:
         print(f"[!] MySQL connection failed on primary and alternate ports: {e}")
         print("[*] Falling back to SQLite local database (academic_council.db)")
