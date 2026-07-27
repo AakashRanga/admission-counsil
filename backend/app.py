@@ -311,11 +311,44 @@ def get_next_grievance_id(db: Session) -> str:
 def get_grievances(db: Session = Depends(get_db)):
     return db.query(models.Grievance).all()
 
+DEPARTMENT_ALIASES_PY = {
+    'cse': 'Computer Science & Engineering',
+    'computer science': 'Computer Science & Engineering',
+    'computer science & engineering': 'Computer Science & Engineering',
+    'computer science and engineering': 'Computer Science & Engineering',
+    'dept of cse': 'Computer Science & Engineering',
+    'eee': 'Electrical & Electronics Eng.',
+    'electrical': 'Electrical & Electronics Eng.',
+    'electrical & electronics engineering': 'Electrical & Electronics Eng.',
+    'ece': 'Electronics & Communication Eng.',
+    'electronics': 'Electronics & Communication Eng.',
+    'mech': 'Mechanical Engineering',
+    'mechanical': 'Mechanical Engineering',
+    'mechanical engineering': 'Mechanical Engineering',
+    'bio': 'Biotechnology & Bioengineering',
+    'biotech': 'Biotechnology & Bioengineering',
+    'biotechnology': 'Biotechnology & Bioengineering',
+    'arch': 'School of Architecture & Design',
+    'architecture': 'School of Architecture & Design',
+    'smb': 'School of Management & Business',
+    'management': 'School of Management & Business',
+    'business': 'School of Management & Business'
+}
+
+def normalize_dept_name(raw: str) -> str:
+    if not raw:
+        return "Computer Science & Engineering"
+    clean = raw.lower().strip()
+    return DEPARTMENT_ALIASES_PY.get(clean, raw.strip())
+
 @app.post("/api/issues", response_model=schemas.GrievanceResponse)
 @app.post("/api/issues/single", response_model=schemas.GrievanceResponse)
 def create_single_grievance(item: schemas.GrievanceCreate, db: Session = Depends(get_db)):
     new_id = get_next_grievance_id(db)
-    db_item = models.Grievance(id=new_id, **item.model_dump())
+    item_dict = item.model_dump()
+    if item_dict.get("department"):
+        item_dict["department"] = normalize_dept_name(item_dict["department"])
+    db_item = models.Grievance(id=new_id, **item_dict)
     db.add(db_item)
     db.commit()
     db.refresh(db_item)
@@ -327,7 +360,10 @@ def create_bulk_grievances(payload: schemas.BulkGrievanceCreate, db: Session = D
     
     for item in payload.items:
         new_id = get_next_grievance_id(db)
-        db_item = models.Grievance(id=new_id, **item.model_dump())
+        item_dict = item.model_dump()
+        if item_dict.get("department"):
+            item_dict["department"] = normalize_dept_name(item_dict["department"])
+        db_item = models.Grievance(id=new_id, **item_dict)
         db.add(db_item)
         db.flush()
         created_items.append(db_item)

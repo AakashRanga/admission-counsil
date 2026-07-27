@@ -14,6 +14,7 @@ import {
   Paperclip,
   Building
 } from 'lucide-react';
+import { normalizeDepartmentName } from '../../utils/csvParser';
 
 interface ModalProps {
   isOpen: boolean;
@@ -237,14 +238,30 @@ export const RegisterComplaintModal: React.FC<ModalProps> = ({ isOpen, onClose }
 
               <div>
                 <label className="block text-[11px] font-medium text-slate-600 dark:text-slate-400 mb-1">Department *</label>
-                <input
-                  type="text"
+                <select
                   required
-                  placeholder="e.g. Computer Science & Engineering"
                   value={department}
-                  onChange={(e) => setDepartment(e.target.value)}
-                  className="w-full px-3 py-2 text-xs rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-brand-500/50 outline-none text-slate-800 dark:text-slate-100"
-                />
+                  onChange={(e) => setDepartment(normalizeDepartmentName(e.target.value))}
+                  className="w-full px-3 py-2 text-xs rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-brand-500/50 outline-none text-slate-800 dark:text-slate-100 font-semibold"
+                >
+                  {departments.length > 0 ? (
+                    departments.map((dept) => (
+                      <option key={dept.id} value={dept.name}>
+                        {dept.name} ({dept.code})
+                      </option>
+                    ))
+                  ) : (
+                    <>
+                      <option value="Computer Science & Engineering">Computer Science & Engineering (CSE)</option>
+                      <option value="Electrical & Electronics Eng.">Electrical & Electronics Eng. (EEE)</option>
+                      <option value="Electronics & Communication Eng.">Electronics & Communication Eng. (ECE)</option>
+                      <option value="Mechanical Engineering">Mechanical Engineering (MECH)</option>
+                      <option value="Biotechnology & Bioengineering">Biotechnology & Bioengineering (BIO)</option>
+                      <option value="School of Architecture & Design">School of Architecture & Design (ARCH)</option>
+                      <option value="School of Management & Business">School of Management & Business (SMB)</option>
+                    </>
+                  )}
+                </select>
               </div>
 
               <div>

@@ -76,3 +76,33 @@ function parseCSVLine(line: string): string[] {
   cols.push(curVal.trim());
   return cols;
 }
+
+export const DEPARTMENT_ALIASES: Record<string, string> = {
+  'cse': 'Computer Science & Engineering',
+  'computer science': 'Computer Science & Engineering',
+  'computer science & engineering': 'Computer Science & Engineering',
+  'computer science and engineering': 'Computer Science & Engineering',
+  'dept of cse': 'Computer Science & Engineering',
+  'eee': 'Electrical & Electronics Eng.',
+  'electrical': 'Electrical & Electronics Eng.',
+  'electrical & electronics engineering': 'Electrical & Electronics Eng.',
+  'ece': 'Electronics & Communication Eng.',
+  'electronics': 'Electronics & Communication Eng.',
+  'mech': 'Mechanical Engineering',
+  'mechanical': 'Mechanical Engineering',
+  'mechanical engineering': 'Mechanical Engineering',
+  'bio': 'Biotechnology & Bioengineering',
+  'biotech': 'Biotechnology & Bioengineering',
+  'biotechnology': 'Biotechnology & Bioengineering',
+  'arch': 'School of Architecture & Design',
+  'architecture': 'School of Architecture & Design',
+  'smb': 'School of Management & Business',
+  'management': 'School of Management & Business',
+  'business': 'School of Management & Business'
+};
+
+export function normalizeDepartmentName(rawInput: string): string {
+  if (!rawInput) return 'Computer Science & Engineering';
+  const clean = rawInput.toLowerCase().trim();
+  return DEPARTMENT_ALIASES[clean] || rawInput.trim();
+}

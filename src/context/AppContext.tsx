@@ -102,7 +102,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [selectedIssueId, setSelectedIssueId] = useState<string | null>(null);
   const [toasts, setToasts] = useState<Toast[]>([]);
 
-  // Function to fetch database records from MySQL via FastAPI REST API
+  // Function to fetch database records via REST API
   const refreshIssuesFromDB = async () => {
     setIsLoading(true);
     try {
@@ -238,7 +238,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         };
       });
 
-      // Replace issues state with live database records from MySQL academic_council
+      // Replace issues state with live database records
       setIssues(mappedDBIssues);
     }
     } catch (err) {
@@ -461,7 +461,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       ]
     };
 
-    // Persist to FastAPI + MySQL Workbench database
+    // Persist to backend database
     apiService.createSingleIssue({
       type: newIssue.type,
       title: newIssue.title,
@@ -491,7 +491,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const updateIssueStatus = (issueId: string, status: IssueStatus, comment?: string) => {
     const nowStr = new Date().toLocaleString([], { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
 
-    // Persist status and remarks log to MySQL backend database via REST API
+    // Persist status and remarks log to backend database via REST API
     apiService.updateStatus(issueId, status, comment);
 
     setIssues(prev => prev.map(issue => {
@@ -577,7 +577,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     const nowStr = new Date().toLocaleString([], { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
     const targetStatus: IssueStatus = closeOrReopen === 'close' ? 'resolved' : 'reopened';
 
-    // Persist final closure or reopening status & feedback to backend MySQL database API
+    // Persist final closure or reopening status & feedback to backend database API
     apiService.verifyResolution(issueId, {
       status: targetStatus,
       rating: feedback.rating,

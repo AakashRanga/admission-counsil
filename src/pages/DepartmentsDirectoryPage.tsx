@@ -47,7 +47,7 @@ export const DepartmentsDirectoryPage: React.FC = () => {
           className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold bg-brand-600 hover:bg-brand-700 text-white shadow-md shadow-brand-500/20 shrink-0"
         >
           <Plus className="w-4 h-4" />
-          Add Department / School
+          Add Department
         </button>
       </div>
 

@@ -55,8 +55,8 @@ export const AddDepartmentModal: React.FC<AddDepartmentModalProps> = ({ isOpen, 
               <Building2 className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-sm font-extrabold text-slate-900 dark:text-slate-100">Add Department / School</h2>
-              <p className="text-[11px] text-slate-400">Save department record to MySQL database</p>
+              <h2 className="text-sm font-extrabold text-slate-900 dark:text-slate-100">Add Department</h2>
+           
             </div>
           </div>
           <button onClick={onClose} className="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
@@ -74,7 +74,7 @@ export const AddDepartmentModal: React.FC<AddDepartmentModalProps> = ({ isOpen, 
 
           <div className="space-y-1">
             <label className="text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
-              <Building2 className="w-3.5 h-3.5 text-brand-500" /> Department / School Name
+              <Building2 className="w-3.5 h-3.5 text-brand-500" /> Department
             </label>
             <input
               type="text"

@@ -62,7 +62,7 @@ export const AddUserModal: React.FC<AddUserModalProps> = ({ isOpen, onClose }) =
             </div>
             <div>
               <h2 className="text-sm font-extrabold text-slate-900 dark:text-slate-100">Add Authority User</h2>
-              <p className="text-[11px] text-slate-400">Register new authority user into MySQL database</p>
+              <p className="text-[11px] text-slate-400">Register new authority user</p>
             </div>
           </div>
           <button onClick={onClose} className="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">

@@ -32,7 +32,7 @@ export const StudentCouncilDashboard: React.FC<DashboardProps> = ({ onOpenRegist
     setIsSyncing(true);
     await refreshIssuesFromDB();
     setIsSyncing(false);
-    addToast('info', 'Database Synced', 'Fetched latest grievance records from MySQL database.');
+    addToast('info', 'Database Synced', 'Fetched latest grievance records from database.');
   };
 
   const [filterType, setFilterType] = useState<string>('all');

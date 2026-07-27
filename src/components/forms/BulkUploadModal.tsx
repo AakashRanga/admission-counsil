@@ -16,7 +16,7 @@ interface BulkUploadModalProps {
   onClose: () => void;
 }
 
-import { parseCSVLines } from '../../utils/csvParser';
+import { parseCSVLines, normalizeDepartmentName } from '../../utils/csvParser';
 import { apiService } from '../../services/api';
 
 export const BulkUploadModal: React.FC<BulkUploadModalProps> = ({ isOpen, onClose }) => {
@@ -104,7 +104,8 @@ export const BulkUploadModal: React.FC<BulkUploadModalProps> = ({ isOpen, onClos
           if (cols.length >= 3 && cols[0].trim()) {
             const studentId = (studentIdIdx !== -1 && cols[studentIdIdx]) ? cols[studentIdIdx].trim() : (cols[0] || `2024STU${100 + i}`);
             const studentName = (nameIdx !== -1 && cols[nameIdx]) ? cols[nameIdx].trim() : (cols[1] || `Student ${i}`);
-            const dept = (deptIdx !== -1 && cols[deptIdx]) ? cols[deptIdx].trim() : (cols[2] || 'Computer Science & Engineering');
+            const deptRaw = (deptIdx !== -1 && cols[deptIdx]) ? cols[deptIdx].trim() : (cols[2] || 'Computer Science & Engineering');
+            const dept = normalizeDepartmentName(deptRaw);
             const mobile = (mobileIdx !== -1 && cols[mobileIdx]) ? cols[mobileIdx].trim() : (cols[3] || '+91 98000 00000');
             const category = (categoryIdx !== -1 && cols[categoryIdx]) ? cols[categoryIdx].trim() : (isMaintenance ? 'General Maintenance' : 'Academic Grievance');
             const description = (descIdx !== -1 && cols[descIdx]) ? cols[descIdx].trim() : (cols[cols.length - 1] || 'Bulk imported complaint.');
@@ -159,7 +160,7 @@ export const BulkUploadModal: React.FC<BulkUploadModalProps> = ({ isOpen, onClos
           await refreshIssuesFromDB();
           const count = res?.count || itemsToUpload.length;
           setImportedCount(count);
-          setImportStatus(`Successfully uploaded ${count} grievances from ${file.name} to MySQL database!`);
+          setImportStatus(`Successfully uploaded ${count} grievances from ${file.name} to the database!`);
           addToast('success', 'Bulk Import Complete', `Added ${count} records to Academic Council Queue.`);
         } else {
           setImportStatus('No valid data rows found in CSV.');
