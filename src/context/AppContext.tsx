@@ -107,28 +107,30 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     setIsLoading(true);
     try {
       const dbData = await apiService.getIssues();
-      if (dbData && Array.isArray(dbData) && dbData.length > 0) {
+      if (dbData && Array.isArray(dbData)) {
         const mappedDBIssues: GrievanceIssue[] = dbData.map((dbItem: any) => {
-        const currentStatus = dbItem.status || 'pending';
-        const assignedTo = dbItem.assigned_staff_name ? {
-          name: dbItem.assigned_staff_name,
-          mobile: dbItem.assigned_staff_mobile || '',
-          specialInstructions: dbItem.special_instructions || '',
-          assignedAt: 'Database Record'
-        } : undefined;
+          const currentStatus = dbItem.status || 'pending';
+          const assignedTo = dbItem.assigned_staff_name ? {
+            name: dbItem.assigned_staff_name,
+            mobile: dbItem.assigned_staff_mobile || '',
+            specialInstructions: dbItem.special_instructions || '',
+            assignedAt: 'Database Record'
+          } : undefined;
 
-        // Parse dbItem.remarks for custom status comments
-        const remarksMap: Record<string, string> = {};
-        if (dbItem.remarks) {
-          const parts = dbItem.remarks.split('|');
-          for (const p of parts) {
-            const trimmed = p.trim();
-            const match = trimmed.match(/^\[([A-Z_]+)\]\s*(.*)$/i);
-            if (match) {
-              remarksMap[match[1].toLowerCase()] = match[2].trim();
+          const timelineEntries: any[] = [];
+
+          // Parse dbItem.remarks for custom status comments
+          const remarksMap: Record<string, string> = {};
+          if (dbItem.remarks) {
+            const parts = dbItem.remarks.split('|');
+            for (const p of parts) {
+              const trimmed = p.trim();
+              const match = trimmed.match(/^\[([A-Z_]+)\]\s*(.*)$/i);
+              if (match) {
+                remarksMap[match[1].toLowerCase()] = match[2].trim();
+              }
             }
           }
-        }
 
         // Step 1: Ticket Registered
         timelineEntries.push({
