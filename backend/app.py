@@ -408,10 +408,26 @@ def update_grievance_status(issue_id: str, payload: schemas.UpdateStatusRequest,
 
     grv.status = payload.status
     if payload.remarks:
+        tag = f"[{payload.status.upper()}] {payload.remarks}"
         if grv.remarks:
-            grv.remarks = f"{grv.remarks} | {payload.remarks}"
+            grv.remarks = f"{grv.remarks} | {tag}"
         else:
-            grv.remarks = payload.remarks
+            grv.remarks = tag
+
+    # Insert AuditLog record
+    try:
+        audit_entry = models.AuditLog(
+            id=f"log-{int(datetime.datetime.utcnow().timestamp() * 1000)}",
+            action="UPDATE_STATUS",
+            performed_by="AUTHORITY DESK",
+            role="authority",
+            target_id=issue_id,
+            timestamp=datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            details=f"Status set to {payload.status.upper()}. {payload.remarks or ''}"
+        )
+        db.add(audit_entry)
+    except Exception as e:
+        print("[*] AuditLog entry warning:", e)
 
     db.commit()
     db.refresh(grv)

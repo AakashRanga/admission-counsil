@@ -117,8 +117,18 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
           assignedAt: 'Database Record'
         } : undefined;
 
-        // Build clean milestone timeline (Ticket Registered -> Staff Assigned -> Under Investigation -> Work Started -> Work Completed -> Closed)
-        const timelineEntries: any[] = [];
+        // Parse dbItem.remarks for custom status comments
+        const remarksMap: Record<string, string> = {};
+        if (dbItem.remarks) {
+          const parts = dbItem.remarks.split('|');
+          for (const p of parts) {
+            const trimmed = p.trim();
+            const match = trimmed.match(/^\[([A-Z_]+)\]\s*(.*)$/i);
+            if (match) {
+              remarksMap[match[1].toLowerCase()] = match[2].trim();
+            }
+          }
+        }
 
         // Step 1: Ticket Registered
         timelineEntries.push({
@@ -147,10 +157,11 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         // Step 3: Under Investigation
         const isInvestigatingOrBeyond = ['investigating', 'work_started', 'work_completed', 'verification_pending', 'resolved'].includes(currentStatus);
         if (isInvestigatingOrBeyond) {
+          const invComment = remarksMap['investigating'] || (dbItem.remarks && !dbItem.remarks.includes('[') ? dbItem.remarks : null);
           timelineEntries.push({
             id: `tl-inv-${dbItem.id}`,
             title: 'Under Investigation',
-            description: 'Authority team initiated detailed investigation of grievance.',
+            description: invComment ? `Log Comment: "${invComment}"` : 'Authority team initiated detailed investigation of grievance.',
             timestamp: 'In Progress',
             performedBy: 'AUTHORITY DESK',
             role: 'ad_academic',
@@ -161,10 +172,11 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         // Step 4: Work Started
         const isWorkStartedOrBeyond = ['work_started', 'work_completed', 'verification_pending', 'resolved'].includes(currentStatus);
         if (isWorkStartedOrBeyond) {
+          const wsComment = remarksMap['work_started'];
           timelineEntries.push({
             id: `tl-started-${dbItem.id}`,
             title: 'Work Started',
-            description: 'Action and resolution work commenced on site/portal.',
+            description: wsComment ? `Log Comment: "${wsComment}"` : 'Action and resolution work commenced on site/portal.',
             timestamp: 'In Progress',
             performedBy: 'ASSIGNED STAFF',
             role: 'ad_academic',
@@ -175,10 +187,11 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         // Step 5: Work Completed
         const isWorkCompletedOrBeyond = ['work_completed', 'verification_pending', 'resolved'].includes(currentStatus);
         if (isWorkCompletedOrBeyond) {
+          const wcComment = remarksMap['work_completed'];
           timelineEntries.push({
             id: `tl-completed-${dbItem.id}`,
             title: 'Work Completed',
-            description: 'Resolution work completed. Forwarded to AD Students for verification.',
+            description: wcComment ? `Log Comment: "${wcComment}"` : 'Resolution work completed. Forwarded to AD Students for verification.',
             timestamp: 'Completed',
             performedBy: 'ASSIGNED STAFF',
             role: 'ad_academic',
@@ -187,15 +200,16 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         }
 
         // Step 6: Ticket Closed & Verified by AD Students
-        if (currentStatus === 'resolved') {
+        if (currentStatus === 'resolved' || currentStatus === 'reopened') {
+          const verComment = dbItem.final_remarks || dbItem.feedback_comments || remarksMap['resolved'] || remarksMap['reopened'];
           timelineEntries.push({
             id: `tl-resolved-${dbItem.id}`,
-            title: 'Ticket Closed & Verified',
-            description: 'Final verification completed with student. Ticket closed by AD Students Welfare.',
-            timestamp: 'Closed',
+            title: currentStatus === 'resolved' ? 'Ticket Closed & Verified' : 'Issue Reopened',
+            description: verComment ? `Log Comment: "${verComment}"` : (currentStatus === 'resolved' ? 'Final verification completed with student. Ticket closed by AD Students Welfare.' : 'Issue reopened by AD Students for further resolution.'),
+            timestamp: dbItem.closed_at || 'Closed',
             performedBy: 'AD STUDENTS WELFARE',
             role: 'ad_students',
-            status: 'resolved'
+            status: currentStatus
           });
         }
 
@@ -509,25 +523,32 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         reopened: 'Reopened'
       };
 
+      const descriptionText = comment ? `Log Comment: "${comment}"` : `Status updated to ${statusLabels[status]}`;
+
       const newTimelineItem = {
         id: 'tl-' + Date.now(),
-        title: `Status set to ${statusLabels[status]}`,
-        description: comment || `Status updated by ${currentRole.replace('_', ' ').toUpperCase()}`,
+        title: statusLabels[status],
+        description: descriptionText,
         timestamp: nowStr,
         performedBy: currentRole.replace('_', ' ').toUpperCase(),
         role: currentRole,
         status
       };
 
+      const updatedRemarks = comment 
+        ? (issue.remarks ? `${issue.remarks} | [${status.toUpperCase()}] ${comment}` : `[${status.toUpperCase()}] ${comment}`)
+        : issue.remarks;
+
       return {
         ...issue,
         status,
+        remarks: updatedRemarks,
         timeline: [newTimelineItem, ...issue.timeline]
       };
     }));
 
-    addAuditLog('UPDATE_STATUS', issueId, `Changed status of ${issueId} to ${status}`);
-    addToast('info', 'Status Updated', `Issue ${issueId} status is now ${status.replace('_', ' ')}. Saved to DB.`);
+    addAuditLog('UPDATE_STATUS', issueId, `Changed status of ${issueId} to ${status}. ${comment ? `Comment: ${comment}` : ''}`);
+    addToast('info', 'Status & Log Updated', `Ticket ${issueId} updated to ${status.replace('_', ' ')}.`);
   };
 
 
