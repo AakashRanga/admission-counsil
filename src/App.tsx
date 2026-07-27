@@ -108,22 +108,6 @@ const MainLayout: React.FC = () => {
   return (
     <div className="h-screen overflow-hidden bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 flex flex-col md:flex-row font-sans transition-colors duration-200">
       
-      {/* Mobile Top Bar with Menu Toggle */}
-      <div className="md:hidden flex items-center justify-between p-3.5 glass-panel border-b border-slate-200 dark:border-slate-800">
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-brand-600 flex items-center justify-center text-white">
-            <GraduationCap className="w-5 h-5" />
-          </div>
-          <span className="font-extrabold text-xs text-slate-900 dark:text-slate-100">SIMATS Academic Council</span>
-        </div>
-        <button
-          onClick={() => setIsMobileSidebarOpen(true)}
-          className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200"
-        >
-          <Menu className="w-5 h-5" />
-        </button>
-      </div>
-
       {/* Main Workspace Layout with Sidebar on Left */}
       <div className="flex flex-1 w-full max-w-[1600px] mx-auto h-screen overflow-hidden">
         <Sidebar 

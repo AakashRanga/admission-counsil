@@ -52,7 +52,7 @@ export const UsersManagementPage: React.FC = () => {
           ) : (
             <div className="space-y-4">
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs">
+              <table className="w-full text-left text-xs min-w-[600px]">
                   <thead>
                     <tr className="border-b border-slate-200 dark:border-slate-800 text-[11px] font-bold text-slate-400 uppercase">
                       <th className="py-2.5 px-3">User Name</th>
