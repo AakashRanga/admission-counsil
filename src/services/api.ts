@@ -6,7 +6,31 @@ const getApiBase = () => {
   return 'http://180.235.121.253:8189/api';
 };
 
-const API_BASE = getApiBase();
+const getFallbackApiBase = () => {
+  if (typeof window !== 'undefined' && window.location) {
+    const hostname = window.location.hostname || '180.235.121.253';
+    return `http://${hostname}:8000/api`;
+  }
+  return 'http://180.235.121.253:8000/api';
+};
+
+let activeApiBase = getApiBase();
+
+async function autoFetch(path: string, options?: RequestInit): Promise<Response> {
+  try {
+    const res = await fetch(`${activeApiBase}${path}`, options);
+    return res;
+  } catch (err) {
+    const altBase = activeApiBase.includes(':8189') ? getFallbackApiBase() : getApiBase();
+    try {
+      const altRes = await fetch(`${altBase}${path}`, options);
+      activeApiBase = altBase; // Switch active base to working port
+      return altRes;
+    } catch (altErr) {
+      throw new Error(`Backend server is offline or unreachable (${activeApiBase}). Please make sure backend is running.`);
+    }
+  }
+}
 
 export interface LoginPayload {
   email: string;
@@ -18,13 +42,13 @@ export const apiService = {
   async login(payload: LoginPayload) {
     let response: Response;
     try {
-      response = await fetch(`${API_BASE}/login`, {
+      response = await autoFetch('/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
     } catch (err: any) {
-      throw new Error('Backend server is offline or unreachable (http://localhost:8000). Please make sure backend is running.');
+      throw new Error(err.message || `Backend server is offline or unreachable on ports 8189/8000. Please make sure backend is running.`);
     }
 
     if (!response.ok) {
@@ -37,7 +61,7 @@ export const apiService = {
 
   async getHealth() {
     try {
-      const res = await fetch(`${API_BASE}/health`);
+      const res = await autoFetch('/health');
       return res.ok;
     } catch {
       return false;
@@ -46,7 +70,7 @@ export const apiService = {
 
   async getIssues() {
     try {
-      const response = await fetch(`${API_BASE}/issues`);
+      const response = await autoFetch('/issues');
       if (!response.ok) return null;
       return await response.json();
     } catch (error) {
@@ -57,7 +81,7 @@ export const apiService = {
 
   async createSingleIssue(payload: any) {
     try {
-      const response = await fetch(`${API_BASE}/issues`, {
+      const response = await autoFetch('/issues', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
@@ -76,7 +100,7 @@ export const apiService = {
 
   async createBulkIssues(items: any[]) {
     try {
-      const response = await fetch(`${API_BASE}/issues/bulk`, {
+      const response = await autoFetch('/issues/bulk', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ items }),
@@ -95,7 +119,7 @@ export const apiService = {
 
   async assignStaff(issueId: string, payload: { assigned_staff_name: string; assigned_staff_mobile: string; special_instructions?: string }) {
     try {
-      const response = await fetch(`${API_BASE}/issues/${issueId}/assign`, {
+      const response = await autoFetch(`/issues/${issueId}/assign`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
@@ -114,7 +138,7 @@ export const apiService = {
 
   async updateStatus(issueId: string, status: string, remarks?: string) {
     try {
-      const response = await fetch(`${API_BASE}/issues/${issueId}/status`, {
+      const response = await autoFetch(`/issues/${issueId}/status`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status, remarks }),
@@ -139,7 +163,7 @@ export const apiService = {
     final_remarks?: string;
   }) {
     try {
-      const response = await fetch(`${API_BASE}/issues/${issueId}/verify`, {
+      const response = await autoFetch(`/issues/${issueId}/verify`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
@@ -158,7 +182,7 @@ export const apiService = {
 
   async getUsers() {
     try {
-      const response = await fetch(`${API_BASE}/users`);
+      const response = await autoFetch('/users');
       if (!response.ok) return null;
       return await response.json();
     } catch (error) {
@@ -169,7 +193,7 @@ export const apiService = {
 
   async createUser(payload: any) {
     try {
-      const response = await fetch(`${API_BASE}/users`, {
+      const response = await autoFetch('/users', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
@@ -187,7 +211,7 @@ export const apiService = {
 
   async getDepartments() {
     try {
-      const response = await fetch(`${API_BASE}/departments`);
+      const response = await autoFetch('/departments');
       if (!response.ok) return null;
       return await response.json();
     } catch (error) {
@@ -198,7 +222,7 @@ export const apiService = {
 
   async createDepartment(payload: any) {
     try {
-      const response = await fetch(`${API_BASE}/departments`, {
+      const response = await autoFetch('/departments', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
@@ -215,7 +239,7 @@ export const apiService = {
 
   async getAuditLogs() {
     try {
-      const response = await fetch(`${API_BASE}/audit-logs`);
+      const response = await autoFetch('/audit-logs');
       if (!response.ok) return null;
       return await response.json();
     } catch (error) {
@@ -226,7 +250,7 @@ export const apiService = {
 
   async createAuditLog(payload: any) {
     try {
-      const response = await fetch(`${API_BASE}/audit-logs`, {
+      const response = await autoFetch('/audit-logs', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
