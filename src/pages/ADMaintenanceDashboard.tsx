@@ -49,7 +49,7 @@ export const ADMaintenanceDashboard: React.FC<ADMaintenanceDashboardProps> = ({ 
     <div className="space-y-6 animate-in fade-in">
       
       {/* Banner */}
-      <div className="p-6 rounded-2xl bg-gradient-to-r from-amber-900 via-slate-900 to-amber-950 text-white shadow-xl border border-amber-800">
+      {/* <div className="p-6 rounded-2xl bg-gradient-to-r from-amber-900 via-slate-900 to-amber-950 text-white shadow-xl border border-amber-800">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 text-xs font-semibold mb-2 border border-amber-500/30">
@@ -64,7 +64,7 @@ export const ADMaintenanceDashboard: React.FC<ADMaintenanceDashboardProps> = ({ 
             </p>
           </div>
         </div>
-      </div>
+      </div> */}
 
       {/* Metrics Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -81,7 +81,7 @@ export const ADMaintenanceDashboard: React.FC<ADMaintenanceDashboardProps> = ({ 
 
         <div className="p-4 rounded-2xl glass-card border border-slate-200 dark:border-slate-800 flex items-center justify-between">
           <div>
-            <span className="text-[11px] font-bold uppercase tracking-wider text-indigo-500">Assigned Staff / Active</span>
+            <span className="text-[11px] font-bold uppercase tracking-wider text-indigo-500">Assigned Staff</span>
             <h3 className="text-2xl font-extrabold text-slate-900 dark:text-slate-100 mt-1">{assignedStaff}</h3>
             <span className="text-[10px] text-slate-400 block mt-0.5">Trade teams on site</span>
           </div>

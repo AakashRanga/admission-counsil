@@ -12,7 +12,6 @@ import {
   Plus, 
   Building2, 
   ArrowUpRight,
-  TrendingUp,
   Filter,
   RotateCcw,
   Database
@@ -41,7 +40,6 @@ export const StudentCouncilDashboard: React.FC<DashboardProps> = ({ onOpenRegist
 
   // Stat card counts
   const pendingCount = issues.filter(i => i.status === 'pending').length;
-  const inProgressCount = issues.filter(i => i.status === 'assigned' || i.status === 'investigating' || i.status === 'work_started' || i.status === 'verification_pending').length;
   const completedCount = issues.filter(i => i.status === 'resolved' || i.status === 'work_completed').length;
 
   // Extract unique departments for dropdown
@@ -136,7 +134,7 @@ export const StudentCouncilDashboard: React.FC<DashboardProps> = ({ onOpenRegist
       </div>
 
       {/* Overview Stat Cards (Interactive Filter Triggers) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div 
           onClick={() => { handleStatusChange('all'); handleTypeChange('all'); handleDepartmentChange('all'); }}
           className={`glass-card p-4 rounded-2xl border cursor-pointer transition-all ${
@@ -147,7 +145,7 @@ export const StudentCouncilDashboard: React.FC<DashboardProps> = ({ onOpenRegist
         >
           <div className="flex items-center justify-between">
             <div>
-              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Total Registered</span>
+              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Total Complaints</span>
               <span className="text-2xl font-extrabold text-slate-900 dark:text-slate-100">{issues.length}</span>
               <span className="text-[10px] text-slate-500 block mt-0.5">Academic & Estate</span>
             </div>
@@ -167,32 +165,12 @@ export const StudentCouncilDashboard: React.FC<DashboardProps> = ({ onOpenRegist
         >
           <div className="flex items-center justify-between">
             <div>
-              <span className="text-[11px] font-bold text-amber-500 uppercase tracking-wider block">Pending Triage</span>
+              <span className="text-[11px] font-bold text-amber-500 uppercase tracking-wider block">Pending Complaints</span>
               <span className="text-2xl font-extrabold text-amber-600 dark:text-amber-400">{pendingCount}</span>
               <span className="text-[10px] text-slate-500 block mt-0.5">Awaiting Assignment</span>
             </div>
             <div className="p-3 rounded-xl bg-amber-50 dark:bg-amber-950 text-amber-600 dark:text-amber-400">
               <Clock className="w-5 h-5" />
-            </div>
-          </div>
-        </div>
-
-        <div 
-          onClick={() => handleStatusChange('in_resolution')}
-          className={`glass-card p-4 rounded-2xl border cursor-pointer transition-all ${
-            filterStatus === 'in_resolution'
-              ? 'border-blue-500 ring-2 ring-blue-500/20'
-              : 'border-slate-200 dark:border-slate-800 hover:border-slate-300'
-          }`}
-        >
-          <div className="flex items-center justify-between">
-            <div>
-              <span className="text-[11px] font-bold text-blue-500 uppercase tracking-wider block">In Resolution</span>
-              <span className="text-2xl font-extrabold text-blue-600 dark:text-blue-400">{inProgressCount}</span>
-              <span className="text-[10px] text-slate-500 block mt-0.5">Staff Dispatched</span>
-            </div>
-            <div className="p-3 rounded-xl bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400">
-              <TrendingUp className="w-5 h-5" />
             </div>
           </div>
         </div>

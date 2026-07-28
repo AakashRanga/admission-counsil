@@ -32,9 +32,9 @@ export const StudentVerificationPage: React.FC<StudentVerificationPageProps> = (
             <CheckSquare className="w-5 h-5 text-purple-500" />
             AD Students - Verification & Resolution Audit Queue
           </h1>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+          {/* <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
             Contact students upon work completion to verify fix satisfaction, record 1-5 star ratings, and finalize ticket closure or reopening.
-          </p>
+          </p> */}
         </div>
         <div className="px-3.5 py-2 rounded-xl bg-purple-50 dark:bg-purple-950 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800 text-xs font-bold font-mono">
           {pendingVerificationIssues.length} Tickets Awaiting Student Audit

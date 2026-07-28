@@ -44,9 +44,9 @@ export const MaintenanceQueuePage: React.FC<MaintenanceQueuePageProps> = ({ onOp
             <Wrench className="w-5 h-5 text-amber-500" />
             AD Maintenance & Repairs Queue
           </h1>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+          {/* <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
             Dispatch electric, plumbing, HVAC, carpentry, and Wi-Fi rapid response squads to campus buildings.
-          </p>
+          </p> */}
         </div>
         <div className="px-3.5 py-2 rounded-xl bg-amber-50 dark:bg-amber-950 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 text-xs font-bold font-mono">
           {filteredIssues.length} Active Tickets

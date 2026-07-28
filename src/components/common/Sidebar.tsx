@@ -14,7 +14,8 @@ import {
   LogOut,
   X,
   PlusCircle,
-  Download
+  Download,
+  Upload
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -22,6 +23,7 @@ interface SidebarProps {
   onLogout: () => void;
   isMobileOpen?: boolean;
   onCloseMobile?: () => void;
+  onOpenBulkUpload?: () => void;
 }
 
 interface NavItem {
@@ -36,7 +38,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onOpenRegisterModal,
   onLogout,
   isMobileOpen = false,
-  onCloseMobile
+  onCloseMobile,
+  onOpenBulkUpload
 }) => {
   const {
     currentRole,
@@ -48,6 +51,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const academicCount = issues.filter(i => i.type === 'academic' && i.status !== 'resolved').length;
   const maintenanceCount = issues.filter(i => i.type === 'maintenance' && i.status !== 'resolved').length;
   const verificationCount = issues.filter(i => i.status === 'verification_pending' || i.status === 'work_completed').length;
+  const showBulkActions = currentRole !== 'ad_academic' && currentRole !== 'ad_maintenance';
 
   const roleTitles: Record<string, string> = {
     student_council: 'Student Council Desk',
@@ -60,7 +64,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const roleMenuSections: Record<string, NavItem[]> = {
     student_council: [
       { id: 'dashboard', label: 'Council Overview', icon: LayoutDashboard },
-      { id: 'register', label: 'Register Complaint', icon: PlusCircle, action: onOpenRegisterModal },
       { id: 'bulk_export', label: 'Bulk Issue Export & Import', icon: Download },
       { id: 'reports', label: 'Reports & Export', icon: FileSpreadsheet }
     ],
@@ -101,7 +104,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <div className="pb-4 border-b border-slate-200/80 dark:border-slate-800/80">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3 cursor-pointer" onClick={() => setActiveTab('dashboard')}>
-              <div className="w-11 h-11 rounded-xl bg-white dark:bg-slate-800 flex items-center justify-center shadow-md shadow-brand-500/10 shrink-0 p-1 border border-slate-200 dark:border-slate-700">
+              <div className="w-11 h-11 rounded-xl bg-white dark:bg-slate-800 flex items-center justify-center shadow-md shadow-brand-500/10 shrink-0 p-1 border border-slate-200 dark:border-slate-700 overflow-hidden">
                 <img src="/simats_logo.png" alt="Saveetha SIMATS Logo" className="w-full h-full object-contain" />
               </div>
               <div>
@@ -113,7 +116,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             </div>
 
             {onCloseMobile && (
-              <button onClick={onCloseMobile} className="p-1 text-slate-400 hover:text-slate-600 md:hidden">
+              <button onClick={onCloseMobile} className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 md:hidden">
                 <X className="w-5 h-5" />
               </button>
             )}
@@ -173,8 +176,21 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
       </div>
 
-      {/* Bottom Section: Logout / Persona Switcher Trigger */}
-      <div className="pt-4 border-t border-slate-200/80 dark:border-slate-800/80 mt-6 space-y-3">
+      {/* Bottom Section: Actions & Logout */}
+      <div className="pt-4 border-t border-slate-200/80 dark:border-slate-800/80 mt-6 space-y-2">
+        {showBulkActions && onOpenBulkUpload && (
+          <button
+            onClick={() => {
+              onOpenBulkUpload();
+              if (onCloseMobile) onCloseMobile();
+            }}
+            className="w-full flex items-center justify-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold bg-brand-50 dark:bg-brand-950/60 text-brand-600 dark:text-brand-400 border border-brand-200 dark:border-brand-800 hover:bg-brand-100 dark:hover:bg-brand-900 transition-colors"
+          >
+            <Upload className="w-4 h-4" />
+            <span>Bulk CSV Upload</span>
+          </button>
+        )}
+
         <button
           onClick={onLogout}
           className="w-full flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-bold bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-800 hover:bg-rose-100 dark:hover:bg-rose-900/60 transition-colors"
@@ -183,9 +199,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <span>Logout</span>
         </button>
 
-        <div className="text-[10px] text-slate-400 text-center">
+        {/* <div className="text-[10px] text-slate-400 text-center pt-1">
           SIMATS Academic Council ERP • v2.4
-        </div>
+        </div> */}
       </div>
 
     </div>

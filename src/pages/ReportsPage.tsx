@@ -115,12 +115,10 @@ export const ReportsPage: React.FC = () => {
           <div className="flex items-center gap-2 mb-1">
             <FileSpreadsheet className="w-5 h-5 text-brand-500" />
             <h1 className="text-xl font-extrabold text-slate-900 dark:text-slate-100">
-              University Grievance Reporting & Export Suite
+              Grievance Reporting & Export Suite
             </h1>
           </div>
-          <p className="text-xs text-slate-500 dark:text-slate-400">
-            Generate official PDF print summaries, search candidate issues, view full ticket details, and export datasets.
-          </p>
+          
 
           {/* Active Role Scope Badge */}
           <div className="mt-3 inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold font-mono bg-brand-50 dark:bg-brand-950 text-brand-700 dark:text-brand-300 border border-brand-200 dark:border-brand-800">

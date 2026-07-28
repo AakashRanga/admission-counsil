@@ -37,9 +37,9 @@ export const DepartmentsDirectoryPage: React.FC = () => {
             <Building2 className="w-5 h-5 text-brand-500" />
             University Departments & Academic Schools Directory
           </h1>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+          {/* <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
             Overarching directory of SIMATS University departments, department heads, faculty rosters, and active grievance loads.
-          </p>
+          </p> */}
         </div>
 
         <button 

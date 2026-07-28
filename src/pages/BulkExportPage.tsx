@@ -184,9 +184,9 @@ export const BulkExportPage: React.FC = () => {
             <FileSpreadsheet className="w-5 h-5 text-brand-500" />
             Bulk Issue Exporter & CSV Import Suite
           </h1>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+          {/* <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
             Download CSV templates tailored by issue type, batch upload complaint sheets, or export datasets for university reports.
-          </p>
+          </p> */}
         </div>
       </div>
 
@@ -249,7 +249,7 @@ export const BulkExportPage: React.FC = () => {
       <div className="glass-panel p-6 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-4">
         <h2 className="text-sm font-bold text-slate-900 dark:text-slate-100 uppercase tracking-wider flex items-center gap-2">
           <Upload className="w-4 h-4 text-brand-500" />
-          Step 2: Upload Completed CSV Batch File
+          Step 2: Upload CSV Issue File
         </h2>
 
         <div className="relative border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-2xl p-8 text-center hover:border-brand-500 transition-colors">
@@ -261,7 +261,7 @@ export const BulkExportPage: React.FC = () => {
           />
           <Upload className="w-8 h-8 text-slate-400 mx-auto mb-2" />
           <h3 className="text-xs font-bold text-slate-800 dark:text-slate-200">
-            Click or Drop Completed CSV File Here to Import
+            Click or Drop CSV File Here to Import
           </h3>
           <p className="text-[11px] text-slate-400 mt-1">
             Supports .CSV batch files generated using official templates above.

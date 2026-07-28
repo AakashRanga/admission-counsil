@@ -24,9 +24,9 @@ export const ClosedHistoryPage: React.FC = () => {
             <History className="w-5 h-5 text-emerald-500" />
             Verified & Closed Grievances History Log
           </h1>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+          {/* <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
             Historical audit log of all grievances verified by AD Students, with satisfaction ratings and final resolution notes.
-          </p>
+          </p> */}
         </div>
         <div className="px-3.5 py-2 rounded-xl bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 text-xs font-bold font-mono">
           {closedIssues.length} Resolved Tickets

@@ -44,9 +44,9 @@ export const AcademicQueuePage: React.FC<AcademicQueuePageProps> = ({ onOpenAssi
             <BookOpen className="w-5 h-5 text-blue-500" />
             AD Academic Affairs - Academic Grievance Work Queue
           </h1>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+          {/* <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
             Dedicated queue for grade disputes, attendance shortage appeals, exam scheduling, and faculty evaluator assignments.
-          </p>
+          </p> */}
         </div>
         <div className="px-3.5 py-2 rounded-xl bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 text-xs font-bold font-mono">
           {filteredIssues.length} Active Academic Disputes

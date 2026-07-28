@@ -1,14 +1,13 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
-import { 
-  ChevronDown, 
-  X, 
-  Menu, 
-  Upload, 
-  Download, 
-  BookOpen, 
-  Wrench,
-  GraduationCap
+import {
+  ChevronDown,
+  X,
+  Menu,
+  Upload,
+  Download,
+  BookOpen,
+  Wrench
 } from 'lucide-react';
 
 interface HeaderProps {
@@ -50,93 +49,76 @@ export const Header: React.FC<HeaderProps> = ({ onToggleMobileSidebar, onOpenBul
   };
 
   return (
-    <header className="sticky top-0 z-40 w-full glass-panel border-b border-slate-200/80 dark:border-slate-800/80 px-3 sm:px-6 py-2.5 sm:py-3 transition-colors duration-200">
-      <div className="flex items-center justify-between gap-2 sm:gap-4">
-        
-        {/* Left: Brand Logo & Title */}
-        <div className="flex items-center gap-2.5 sm:gap-3">
-          <div className="w-8 h-8 rounded-xl bg-brand-600 flex items-center justify-center text-white shadow-md shadow-brand-500/20 shrink-0">
-            <GraduationCap className="w-4 h-4 sm:w-5 sm:h-5" />
+    <header className="md:hidden sticky top-0 z-40 w-full glass-panel border-b border-slate-200/80 dark:border-slate-800/80 px-4 py-2.5 transition-colors duration-200">
+      <div className="flex items-center justify-between gap-3">
+
+        {/* Left: Mobile Official SIMATS Logo & Name */}
+        <div className="flex items-center gap-2.5 min-w-0">
+          <div className="w-9 h-9 rounded-xl bg-white dark:bg-slate-800 flex items-center justify-center p-1 border border-slate-200 dark:border-slate-700 shadow-sm shrink-0 overflow-hidden">
+            <img src="/simats_logo.png" alt="SIMATS Logo" className="w-full h-full object-contain" />
           </div>
-          <div>
-            <h1 className="font-extrabold text-xs sm:text-sm text-slate-900 dark:text-slate-100 tracking-tight leading-tight">
-              SIMATS Academic Council
+          <div className="min-w-0">
+            <span className="text-[9px] font-bold text-brand-600 dark:text-brand-400 uppercase tracking-wider block truncate">
+              SIMATS University
+            </span>
+            <h1 className="text-xs font-extrabold text-slate-900 dark:text-slate-100 leading-tight truncate">
+              Academic Council
             </h1>
-            <p className="text-[10px] text-slate-500 dark:text-slate-400 hidden xs:block">
-              Grievance Management System
-            </p>
           </div>
         </div>
 
-        {/* Right: Actions & Single Mobile Hamburger Button */}
-        <div className="flex items-center gap-1.5 sm:gap-2">
+        {/* Right: Quick Mobile Actions & Hamburger Toggle */}
+        <div className="flex items-center gap-1.5 shrink-0">
           {showBulkActions && (
-            <>
-              {/* CSV Template Download Dropdown */}
-              <div className="relative">
-                <button
-                  onClick={() => setShowTemplateDropdown(!showTemplateDropdown)}
-                  className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold transition-all border border-slate-200 dark:border-slate-700"
-                  title="Download CSV Templates"
-                >
-                  <Download className="w-3.5 h-3.5 text-brand-500 shrink-0" />
-                  <span className="hidden md:inline">Templates</span>
-                  <ChevronDown className="w-3 h-3 text-slate-400" />
-                </button>
-
-                {showTemplateDropdown && (
-                  <div 
-                    className="absolute right-0 mt-2 w-64 rounded-xl glass-panel shadow-2xl border border-slate-200 dark:border-slate-700 p-2 z-50 animate-in fade-in zoom-in-95"
-                    onMouseLeave={() => setShowTemplateDropdown(false)}
-                  >
-                    <div className="px-3 py-1.5 border-b border-slate-100 dark:border-slate-700/60 flex items-center justify-between">
-                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">CSV Issue Templates</p>
-                      <button onClick={() => setShowTemplateDropdown(false)} className="text-slate-400">
-                        <X className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                    <div className="py-1 space-y-1">
-                      <button
-                        onClick={() => downloadTemplate('academic')}
-                        className="w-full text-left px-3 py-2 rounded-lg flex items-center gap-2 text-xs hover:bg-brand-50 dark:hover:bg-brand-950/60 text-slate-700 dark:text-slate-200 transition-colors"
-                      >
-                        <BookOpen className="w-4 h-4 text-brand-500 shrink-0" />
-                        <div>
-                          <div className="font-bold text-[11px]">Academic Template (.CSV)</div>
-                          <div className="text-[10px] text-slate-400">Course & Grade Issues</div>
-                        </div>
-                      </button>
-                      <button
-                        onClick={() => downloadTemplate('maintenance')}
-                        className="w-full text-left px-3 py-2 rounded-lg flex items-center gap-2 text-xs hover:bg-amber-50 dark:hover:bg-amber-950/60 text-slate-700 dark:text-slate-200 transition-colors"
-                      >
-                        <Wrench className="w-4 h-4 text-amber-500 shrink-0" />
-                        <div>
-                          <div className="font-bold text-[11px]">Maintenance Template (.CSV)</div>
-                          <div className="text-[10px] text-slate-400">Repair Issues</div>
-                        </div>
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Bulk Issue Upload Trigger */}
+            <div className="relative">
               <button
-                onClick={onOpenBulkUpload}
-                className="flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold shadow-md shadow-brand-500/20 transition-all shrink-0"
-                title="Upload CSV Issue Batch"
+                onClick={() => setShowTemplateDropdown(!showTemplateDropdown)}
+                className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition-all border border-slate-200 dark:border-slate-700"
+                title="Download CSV Templates"
               >
-                <Upload className="w-3.5 h-3.5 shrink-0" />
-                <span className="hidden sm:inline">Bulk Issue Upload</span>
+                <Download className="w-4 h-4 text-brand-500" />
               </button>
-            </>
+
+              {showTemplateDropdown && (
+                <div
+                  className="absolute right-0 mt-2 w-60 rounded-xl glass-panel shadow-2xl border border-slate-200 dark:border-slate-700 p-2 z-50 animate-in fade-in"
+                  onMouseLeave={() => setShowTemplateDropdown(false)}
+                >
+                  <div className="px-2.5 py-1 border-b border-slate-100 dark:border-slate-700/60 flex items-center justify-between">
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">CSV Issue Templates</p>
+                    <button onClick={() => setShowTemplateDropdown(false)} className="text-slate-400">
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                  <div className="py-1 space-y-1">
+                    <button
+                      onClick={() => downloadTemplate('academic')}
+                      className="w-full text-left px-2.5 py-1.5 rounded-lg flex items-center gap-2 text-xs hover:bg-brand-50 dark:hover:bg-brand-950 text-slate-700 dark:text-slate-200"
+                    >
+                      <BookOpen className="w-4 h-4 text-brand-500 shrink-0" />
+                      <div>
+                        <div className="font-bold text-[11px]">Academic Template (.CSV)</div>
+                      </div>
+                    </button>
+                    <button
+                      onClick={() => downloadTemplate('maintenance')}
+                      className="w-full text-left px-2.5 py-1.5 rounded-lg flex items-center gap-2 text-xs hover:bg-amber-50 dark:hover:bg-amber-950 text-slate-700 dark:text-slate-200"
+                    >
+                      <Wrench className="w-4 h-4 text-amber-500 shrink-0" />
+                      <div>
+                        <div className="font-bold text-[11px]">Maintenance Template (.CSV)</div>
+                      </div>
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           )}
 
-          {/* Single Mobile Hamburger Toggle */}
+          {/* Hamburger Menu Toggle */}
           <button
             onClick={onToggleMobileSidebar}
-            className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 md:hidden hover:bg-slate-200 dark:hover:bg-slate-700 ml-1"
+            className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700"
             title="Open Menu"
           >
             <Menu className="w-5 h-5" />

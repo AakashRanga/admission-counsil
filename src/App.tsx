@@ -115,6 +115,7 @@ const MainLayout: React.FC = () => {
           onLogout={handleLogout}
           isMobileOpen={isMobileSidebarOpen}
           onCloseMobile={() => setIsMobileSidebarOpen(false)}
+          onOpenBulkUpload={() => setIsBulkUploadOpen(true)}
         />
 
         <main className="flex-1 flex flex-col h-screen overflow-hidden min-w-0">

@@ -50,12 +50,12 @@ export const AdminDashboard: React.FC = () => {
               <Shield className="w-3.5 h-3.5 text-brand-400" />
               Central Academic Council Administrator Operations
             </div>
-            <h1 className="text-xl font-extrabold tracking-tight">
+            {/* <h1 className="text-xl font-extrabold tracking-tight">
               University System Operations & Analytics Engine
             </h1>
             <p className="text-xs text-slate-300 mt-1 max-w-2xl">
               Overarching governance portal for managing university departments, authority dispatchers, audit logs, and cross-campus resolution metrics.
-            </p>
+            </p> */}
           </div>
           <div className="flex gap-2">
             <button

@@ -23,9 +23,9 @@ export const AuditLogsPage: React.FC = () => {
             <Shield className="w-5 h-5 text-brand-500" />
             System Audit Trail & Security Logs
           </h1>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+          {/* <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
             Immutable system execution record tracking every complaint intake, staff dispatch, status modification, and verification closure.
-          </p>
+          </p> */}
         </div>
       </div>
 

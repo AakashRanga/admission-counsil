@@ -38,7 +38,7 @@ export const ADStudentsDashboard: React.FC<ADStudentsDashboardProps> = ({ onOpen
     <div className="space-y-6 animate-in fade-in">
       
       {/* Banner */}
-      <div className="p-6 rounded-2xl bg-gradient-to-r from-purple-900 via-indigo-950 to-slate-900 text-white shadow-xl border border-purple-800">
+      {/* <div className="p-6 rounded-2xl bg-gradient-to-r from-purple-900 via-indigo-950 to-slate-900 text-white shadow-xl border border-purple-800">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/20 text-purple-300 text-xs font-semibold mb-2 border border-purple-500/30">
@@ -53,7 +53,7 @@ export const ADStudentsDashboard: React.FC<ADStudentsDashboardProps> = ({ onOpen
             </p>
           </div>
         </div>
-      </div>
+      </div> */}
 
       {/* Overview Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
